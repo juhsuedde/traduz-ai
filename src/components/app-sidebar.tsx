@@ -5,6 +5,7 @@ import {
   FolderOpen,
   PencilRuler,
   Settings,
+  Lightbulb,
   Sparkles,
   Menu,
   X,
@@ -23,6 +24,7 @@ const items = [
   { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-purple-300 to-violet-300" },
   { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
   { title: "Configurações", url: "/configuracoes", icon: Settings, accent: "from-slate-300 to-purple-300" },
+  { title: "Sugestões", url: "/sugestoes", icon: Lightbulb, accent: "from-amber-200 to-orange-200" },
 ] as const;
 
 const recentThreads = [
