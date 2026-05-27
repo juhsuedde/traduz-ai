@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MessageCircle,
   FolderOpen,
@@ -14,17 +14,17 @@ import {
   ChevronRight,
   ArrowRight,
   Shuffle,
+  SlidersHorizontal,
 } from "lucide-react";
 import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useActiveProject, setActiveProject } from "@/lib/active-project-store";
+import { shortLabel, useQuickSettings } from "@/lib/quick-settings";
 
 const items = [
   { title: "Início", url: "/inicio", icon: MessageCircle, accent: "from-pink-300 to-purple-300" },
   { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-purple-300 to-violet-300" },
   { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
-  { title: "Configurações", url: "/configuracoes", icon: Settings, accent: "from-slate-300 to-purple-300" },
-  { title: "Sugestões", url: "/sugestoes", icon: Lightbulb, accent: "from-amber-200 to-orange-200" },
 ] as const;
 
 const recentThreads = [
