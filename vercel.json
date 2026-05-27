@@ -1,6 +1,6 @@
 {
   "version": 2,
+  "framework": "nitro",
   "buildCommand": "bun run build",
-  "outputDirectory": "dist",
   "installCommand": "bun install"
 }
