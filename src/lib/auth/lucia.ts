@@ -1,28 +1,47 @@
 import { Lucia } from "lucia";
-import { BunSQLiteAdapter } from "@lucia-auth/adapter-sqlite";
-import { Database } from "bun:sqlite";
+import { db, sqlite } from "../db";
 
-const sqlite = new Database("traduzai.db");
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _lucia: Lucia<any, any>;
 
-const adapter = new BunSQLiteAdapter(sqlite, {
-  user: "users",
-  session: "user_sessions",
-});
+async function init() {
+  if (_lucia) return _lucia;
 
-export const lucia = new Lucia(adapter, {
-  sessionCookie: {
-    attributes: {
-      secure: process.env.NODE_ENV === "production",
+  const isBun = typeof Bun !== "undefined";
+
+  const adapter = isBun
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (await import("@lucia-auth/adapter-sqlite")).BunSQLiteAdapter(sqlite as any, {
+        user: "users",
+        session: "user_sessions",
+      })
+    : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      new (await import("@lucia-auth/adapter-sqlite")).BetterSqlite3Adapter(sqlite as any, {
+        user: "users",
+        session: "user_sessions",
+      });
+
+  _lucia = new Lucia(adapter, {
+    sessionCookie: {
+      attributes: {
+        secure: process.env.NODE_ENV === "production",
+      },
     },
-  },
-  getUserAttributes: (attributes) => {
-    return {
-      email: attributes.email,
-      name: attributes.name,
-      avatarUrl: attributes.avatar_url,
-    };
-  },
-});
+    getUserAttributes: (attributes) => {
+      return {
+        email: attributes.email,
+        name: attributes.name,
+        avatarUrl: attributes.avatar_url,
+      };
+    },
+  });
+
+  return _lucia!;
+}
+
+const lucia = await init();
+
+export { lucia };
 
 declare module "lucia" {
   interface Register {
