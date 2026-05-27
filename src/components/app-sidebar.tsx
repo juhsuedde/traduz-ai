@@ -60,9 +60,20 @@ function SidebarContent({
     <div className="flex flex-col gap-3 h-full">
       {/* Logo */}
       <div className={`glass rounded-3xl flex items-center gap-3 ${collapsed ? "p-3 justify-center" : "p-5"}`}>
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm shrink-0">
-          <Sparkles className="w-5 h-5 text-white" />
-        </div>
+        {collapsed ? (
+          <Link
+            to="/inicio"
+            onClick={onNavigate}
+            title="Voltar ao início"
+            className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm shrink-0 hover:scale-105 transition"
+          >
+            <Sparkles className="w-5 h-5 text-white" />
+          </Link>
+        ) : (
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm shrink-0">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+        )}
         {!collapsed && (
           <div className="min-w-0">
             <div className="font-semibold tracking-tight text-foreground truncate">
