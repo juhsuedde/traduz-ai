@@ -9,30 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ProjectsRouteImport } from './routes/projects'
-import { Route as GlossaryRouteImport } from './routes/glossary'
-import { Route as ChatRouteImport } from './routes/chat'
+import { Route as RevisorRouteImport } from './routes/revisor'
+import { Route as ProjetosRouteImport } from './routes/projetos'
+import { Route as InicioRouteImport } from './routes/inicio'
 import { Route as IndexRouteImport } from './routes/index'
 
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const RevisorRoute = RevisorRouteImport.update({
+  id: '/revisor',
+  path: '/revisor',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
+const ProjetosRoute = ProjetosRouteImport.update({
+  id: '/projetos',
+  path: '/projetos',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GlossaryRoute = GlossaryRouteImport.update({
-  id: '/glossary',
-  path: '/glossary',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
+const InicioRoute = InicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,70 +37,59 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/glossary': typeof GlossaryRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
+  '/inicio': typeof InicioRoute
+  '/projetos': typeof ProjetosRoute
+  '/revisor': typeof RevisorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/glossary': typeof GlossaryRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
+  '/inicio': typeof InicioRoute
+  '/projetos': typeof ProjetosRoute
+  '/revisor': typeof RevisorRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/chat': typeof ChatRoute
-  '/glossary': typeof GlossaryRoute
-  '/projects': typeof ProjectsRoute
-  '/settings': typeof SettingsRoute
+  '/inicio': typeof InicioRoute
+  '/projetos': typeof ProjetosRoute
+  '/revisor': typeof RevisorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/chat' | '/glossary' | '/projects' | '/settings'
+  fullPaths: '/' | '/inicio' | '/projetos' | '/revisor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/chat' | '/glossary' | '/projects' | '/settings'
-  id: '__root__' | '/' | '/chat' | '/glossary' | '/projects' | '/settings'
+  to: '/' | '/inicio' | '/projetos' | '/revisor'
+  id: '__root__' | '/' | '/inicio' | '/projetos' | '/revisor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChatRoute: typeof ChatRoute
-  GlossaryRoute: typeof GlossaryRoute
-  ProjectsRoute: typeof ProjectsRoute
-  SettingsRoute: typeof SettingsRoute
+  InicioRoute: typeof InicioRoute
+  ProjetosRoute: typeof ProjetosRoute
+  RevisorRoute: typeof RevisorRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
+    '/revisor': {
+      id: '/revisor'
+      path: '/revisor'
+      fullPath: '/revisor'
+      preLoaderRoute: typeof RevisorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
+    '/projetos': {
+      id: '/projetos'
+      path: '/projetos'
+      fullPath: '/projetos'
+      preLoaderRoute: typeof ProjetosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/glossary': {
-      id: '/glossary'
-      path: '/glossary'
-      fullPath: '/glossary'
-      preLoaderRoute: typeof GlossaryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
+    '/inicio': {
+      id: '/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof InicioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,10 +104,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChatRoute: ChatRoute,
-  GlossaryRoute: GlossaryRoute,
-  ProjectsRoute: ProjectsRoute,
-  SettingsRoute: SettingsRoute,
+  InicioRoute: InicioRoute,
+  ProjetosRoute: ProjetosRoute,
+  RevisorRoute: RevisorRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
