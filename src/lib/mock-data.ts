@@ -50,10 +50,7 @@ export type GlossaryEntry = {
 };
 
 export const glossary: GlossaryEntry[] = [
-  { id: "g1", source: "Glow", target: "Brillo", note: "Use as noun. Avoid 'resplandor' (too formal).", tag: "Brand voice" },
-  { id: "g2", source: "Routine", target: "Rutina", note: "Daily ritual context — never 'régimen'.", tag: "Product" },
-  { id: "g3", source: "Radiant", target: "Radiante", note: "Approved by client style guide v2.", tag: "Approved" },
-  { id: "g4", source: "Hydration boost", target: "Impulso de hidratación", note: "Marketing-friendly; clinical version: 'hidratación intensiva'.", tag: "Marketing" },
-  { id: "g5", source: "Cruelty-free", target: "Libre de crueldad", note: "Do not translate as 'sin crueldad'.", tag: "Compliance" },
-  { id: "g6", source: "Skin barrier", target: "Barrera cutánea", note: "Scientific. Use consistently across SKUs.", tag: "Technical" },
+  { id: "g1", source: "Mind Flayer", target: "Devorador de Mentes", note: "Manter o nome consagrado da dublagem.", tag: "Personagem" },
+  { id: "g2", source: "Upside Down", target: "Mundo Invertido", note: "Sempre com inicial maiúscula.", tag: "Universo" },
+  { id: "g3", source: "Demogorgon", target: "Demogorgon", note: "Não traduzir.", tag: "Aprovado" },
 ];
