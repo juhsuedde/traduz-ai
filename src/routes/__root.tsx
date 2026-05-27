@@ -72,16 +72,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "traduz.ai" },
+      { title: "traduz.ai — Assistente para tradutores" },
       { name: "description", content: "Assistente inteligente para tradutores profissionais." },
       { name: "author", content: "traduz.ai" },
-      { property: "og:title", content: "traduz.ai" },
+      { property: "og:title", content: "traduz.ai — Assistente para tradutores" },
       { property: "og:description", content: "Assistente inteligente para tradutores profissionais." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@traduzai" },
     ],
     links: [
+      {
+        rel: "icon",
+        type: "image/svg+xml",
+        href:
+          "data:image/svg+xml;utf8," +
+          encodeURIComponent(
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#f9a8d4"/><stop offset="100%" stop-color="#c4b5fd"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><text x="32" y="40" font-family="Inter,Arial,sans-serif" font-size="30" font-weight="700" text-anchor="middle" fill="white">文A</text></svg>`,
+          ),
+      },
       {
         rel: "stylesheet",
         href: appCss,
