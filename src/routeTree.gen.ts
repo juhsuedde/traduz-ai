@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RevisorRouteImport } from './routes/revisor'
 import { Route as ProjetosRouteImport } from './routes/projetos'
 import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as IndexRouteImport } from './routes/index'
 
 const RevisorRoute = RevisorRouteImport.update({
@@ -29,6 +30,11 @@ const InicioRoute = InicioRouteImport.update({
   path: '/inicio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/inicio' | '/projetos' | '/revisor'
+  fullPaths: '/' | '/configuracoes' | '/inicio' | '/projetos' | '/revisor'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/inicio' | '/projetos' | '/revisor'
-  id: '__root__' | '/' | '/inicio' | '/projetos' | '/revisor'
+  to: '/' | '/configuracoes' | '/inicio' | '/projetos' | '/revisor'
+  id: '__root__' | '/' | '/configuracoes' | '/inicio' | '/projetos' | '/revisor'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
   InicioRoute: typeof InicioRoute
   ProjetosRoute: typeof ProjetosRoute
   RevisorRoute: typeof RevisorRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InicioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
   InicioRoute: InicioRoute,
   ProjetosRoute: ProjetosRoute,
   RevisorRoute: RevisorRoute,
@@ -111,3 +129,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

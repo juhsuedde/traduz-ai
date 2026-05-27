@@ -122,6 +122,7 @@ export function buildPrompt(opts: {
 
 let byProject: Record<string, QuickSettings> = {};
 let sessionSettings: QuickSettings = { ...DEFAULT_SETTINGS };
+let globalDefaults: QuickSettings = { ...DEFAULT_SETTINGS };
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
 
@@ -131,7 +132,7 @@ function subscribe(cb: () => void) {
 }
 
 export function getProjectSettings(projectId: string): QuickSettings {
-  return byProject[projectId] ?? { ...DEFAULT_SETTINGS };
+  return byProject[projectId] ?? { ...globalDefaults };
 }
 
 export function setProjectSettings(projectId: string, s: QuickSettings) {
@@ -151,11 +152,25 @@ export function setSessionSettings(s: QuickSettings) {
   emit();
 }
 
+export function getGlobalDefaults(): QuickSettings {
+  return { ...globalDefaults };
+}
+
+export function setGlobalDefaults(s: QuickSettings) {
+  globalDefaults = { ...s };
+  emit();
+}
+
+export function resetGlobalDefaults() {
+  globalDefaults = { ...DEFAULT_SETTINGS };
+  emit();
+}
+
 /** Subscribes to settings for a given project id, or session if null. */
 export function useQuickSettings(projectId: string | null): QuickSettings {
   return useSyncExternalStore(
     subscribe,
-    () => (projectId ? byProject[projectId] ?? DEFAULT_SETTINGS : sessionSettings),
+    () => (projectId ? byProject[projectId] ?? globalDefaults : sessionSettings),
     () => DEFAULT_SETTINGS,
   );
 }
@@ -166,5 +181,14 @@ export function useHasProjectOverride(projectId: string | null): boolean {
     subscribe,
     () => (projectId ? Object.prototype.hasOwnProperty.call(byProject, projectId) : false),
     () => false,
+  );
+}
+
+/** Hook for global defaults used when creating new projects. */
+export function useGlobalDefaults(): QuickSettings {
+  return useSyncExternalStore(
+    subscribe,
+    () => globalDefaults,
+    () => DEFAULT_SETTINGS,
   );
 }
