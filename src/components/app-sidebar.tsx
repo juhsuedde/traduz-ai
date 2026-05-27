@@ -4,6 +4,7 @@ import {
   MessageCircle,
   FolderOpen,
   PencilRuler,
+  Settings,
   Sparkles,
   Menu,
   X,
@@ -21,6 +22,7 @@ const items = [
   { title: "Início", url: "/inicio", icon: MessageCircle, accent: "from-pink-300 to-purple-300" },
   { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-purple-300 to-violet-300" },
   { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
+  { title: "Configurações", url: "/configuracoes", icon: Settings, accent: "from-slate-300 to-purple-300" },
 ] as const;
 
 const recentThreads = [
