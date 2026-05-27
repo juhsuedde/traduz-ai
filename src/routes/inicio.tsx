@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { projects, type ChatMessage } from "@/lib/mock-data";
 import { Send, Paperclip, Image as ImageIcon, ChevronDown, Sparkles } from "lucide-react";
+import { setActiveProject } from "@/lib/active-project-store";
 
 export const Route = createFileRoute("/inicio")({
   head: () => ({
@@ -43,6 +44,14 @@ function ChatPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, typing]);
+
+  useEffect(() => {
+    setActiveProject(
+      activeProject
+        ? { id: activeProject.id, name: activeProject.name, domain: activeProject.domain }
+        : null,
+    );
+  }, [activeProject]);
 
   const send = () => {
     const text = input.trim();
