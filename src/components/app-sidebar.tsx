@@ -1,28 +1,27 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, FolderKanban, MessageSquareText, BookOpen, Settings, Sparkles } from "lucide-react";
+import { useState } from "react";
+import { MessageCircle, FolderOpen, PencilRuler, Sparkles, Menu, X } from "lucide-react";
 import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const items = [
-  { title: "Home", url: "/", icon: LayoutDashboard },
-  { title: "Projects", url: "/projects", icon: FolderKanban },
-  { title: "Assistant", url: "/chat", icon: MessageSquareText },
-  { title: "Glossary", url: "/glossary", icon: BookOpen },
-  { title: "Settings", url: "/settings", icon: Settings },
-];
+  { title: "Início", url: "/inicio", icon: MessageCircle, accent: "from-pink-300 to-purple-300" },
+  { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-sky-300 to-teal-300" },
+  { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
+] as const;
 
-export function AppSidebar() {
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
-    <aside className="hidden lg:flex w-64 flex-col gap-4 p-4 sticky top-0 h-screen">
+    <div className="flex flex-col gap-4 h-full">
       <div className="glass rounded-3xl p-5 flex items-center gap-3">
         <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="font-semibold tracking-tight text-foreground">traduz<span className="text-primary">.ai</span></div>
-          <div className="text-xs text-muted-foreground">for translators</div>
+          <div className="font-semibold tracking-tight text-foreground">
+            traduz<span className="text-primary">.ai</span>
+          </div>
+          <div className="text-xs text-muted-foreground">para tradutores</div>
         </div>
       </div>
 
@@ -33,13 +32,22 @@ export function AppSidebar() {
             <Link
               key={item.url}
               to={item.url}
+              onClick={onNavigate}
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm transition-all ${
                 active
                   ? "bg-white/70 text-foreground shadow-sm"
                   : "text-muted-foreground hover:bg-white/40 hover:text-foreground"
               }`}
             >
-              <item.icon className="w-4 h-4" />
+              <span
+                className={`w-8 h-8 rounded-xl flex items-center justify-center transition ${
+                  active
+                    ? `bg-gradient-to-br ${item.accent} text-white shadow-sm`
+                    : "bg-white/40 text-muted-foreground"
+                }`}
+              >
+                <item.icon className="w-4 h-4" />
+              </span>
               <span className="font-medium">{item.title}</span>
             </Link>
           );
@@ -57,6 +65,49 @@ export function AppSidebar() {
           <div className="text-xs text-muted-foreground truncate">{currentUser.role}</div>
         </div>
       </div>
-    </aside>
+    </div>
+  );
+}
+
+export function AppSidebar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setOpen(true)}
+        className="lg:hidden fixed top-4 left-4 z-40 glass rounded-2xl p-3 shadow-sm"
+        aria-label="Abrir menu"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-64 flex-col p-4 sticky top-0 h-screen">
+        <SidebarContent pathname={pathname} />
+      </aside>
+
+      {/* Mobile drawer */}
+      {open && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+          <aside className="absolute left-0 top-0 bottom-0 w-72 p-4 animate-in slide-in-from-left">
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-6 right-6 z-10 glass rounded-xl p-2"
+              aria-label="Fechar menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <SidebarContent pathname={pathname} onNavigate={() => setOpen(false)} />
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
