@@ -106,16 +106,22 @@ function SidebarContent({
             </button>
           </div>
           <div className="flex flex-col gap-0.5 overflow-y-auto pr-1">
-            {recentThreads.map((t) => (
-              <Link
-                key={t.id}
-                to="/inicio"
-                onClick={onNavigate}
-                className="px-3 py-2 rounded-xl text-xs text-muted-foreground hover:bg-white/40 hover:text-foreground transition truncate"
-              >
-                {t.title}
-              </Link>
-            ))}
+            {recentThreads.length === 0 ? (
+              <div className="text-xs text-muted-foreground/70 px-3 py-3 italic">
+                Nenhuma conversa ainda
+              </div>
+            ) : (
+              recentThreads.map((t) => (
+                <Link
+                  key={t.id}
+                  to="/inicio"
+                  onClick={onNavigate}
+                  className="px-3 py-2 rounded-xl text-xs text-muted-foreground hover:bg-white/40 hover:text-foreground transition truncate"
+                >
+                  {t.title}
+                </Link>
+              ))
+            )}
           </div>
         </div>
       )}
