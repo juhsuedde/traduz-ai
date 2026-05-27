@@ -146,15 +146,27 @@ function SidebarContent({
       {!collapsed && activeProject && (
         <div className="glass rounded-3xl p-3 flex flex-col gap-2">
           <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1">
-            Projeto ativo
+            Contexto ativo
           </span>
           <div className="bg-white/60 rounded-2xl p-3 flex flex-col gap-2">
             <div className="font-medium text-sm leading-tight">{activeProject.name}</div>
             <span className="text-[10px] self-start px-2 py-0.5 rounded-full font-medium bg-gradient-to-r from-pink-200 to-purple-200 text-purple-900">
               {activeProject.domain}
             </span>
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground pt-1 border-t border-white/60">
+              <SlidersHorizontal className="w-3 h-3 shrink-0" />
+              <span className="truncate">{shortLabel(activeSettings)}</span>
+            </div>
           </div>
           <div className="flex gap-1.5">
+            <Link
+              to="/inicio"
+              onClick={onNavigate}
+              className="flex-1 text-xs px-3 py-2 rounded-xl bg-white/60 hover:bg-white text-foreground flex items-center justify-center gap-1 transition"
+              title="Ajustar configurações de tradução"
+            >
+              <SlidersHorizontal className="w-3 h-3" /> Ajustar
+            </Link>
             <Link
               to="/projetos"
               onClick={onNavigate}
@@ -174,18 +186,57 @@ function SidebarContent({
       )}
 
       {/* Perfil */}
-      <div className={`glass rounded-3xl flex items-center gap-3 ${collapsed ? "p-2 justify-center" : "p-4"}`}>
-        <Avatar className="w-10 h-10 shrink-0">
-          <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white font-semibold">
-            {currentUser.initials}
-          </AvatarFallback>
-        </Avatar>
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="text-sm font-semibold truncate">{currentUser.name}</div>
-            <div className="text-xs text-muted-foreground truncate">Tradutora EN → PT</div>
+      <div className="relative" ref={profileRef}>
+        {profileOpen && (
+          <div
+            className={`absolute bottom-full mb-2 glass rounded-2xl p-2 flex flex-col gap-1 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+              collapsed ? "left-0 w-44" : "left-0 right-0"
+            }`}
+          >
+            <Link
+              to="/configuracoes"
+              onClick={() => {
+                setProfileOpen(false);
+                onNavigate?.();
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
+            >
+              <Settings className="w-4 h-4 text-muted-foreground" />
+              Configurações
+            </Link>
+            <Link
+              to="/sugestoes"
+              onClick={() => {
+                setProfileOpen(false);
+                onNavigate?.();
+              }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
+            >
+              <Lightbulb className="w-4 h-4 text-muted-foreground" />
+              Sugestões
+            </Link>
           </div>
         )}
+        <button
+          type="button"
+          onClick={() => setProfileOpen((o) => !o)}
+          className={`glass rounded-3xl flex items-center gap-3 w-full text-left transition hover:bg-white/60 ${
+            collapsed ? "p-2 justify-center" : "p-4"
+          } ${profileOpen ? "ring-2 ring-purple-200" : ""}`}
+          aria-label="Abrir menu do perfil"
+        >
+          <Avatar className="w-10 h-10 shrink-0">
+            <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white font-semibold">
+              {currentUser.initials}
+            </AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="min-w-0 flex-1">
+              <div className="text-sm font-semibold truncate">{currentUser.name}</div>
+              <div className="text-xs text-muted-foreground truncate">Tradutora</div>
+            </div>
+          )}
+        </button>
       </div>
     </div>
   );
