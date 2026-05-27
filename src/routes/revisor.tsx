@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { Sparkles, Upload, Loader2, FileText, CheckCircle2 } from "lucide-react";
+import { Sparkles, Upload, FileText, CheckCircle2, Search } from "lucide-react";
+import { useActiveProject } from "@/lib/active-project-store";
 
 export const Route = createFileRoute("/revisor")({
   head: () => ({
@@ -25,13 +26,15 @@ type Note = { type: "Gramática" | "Semântica" | "Fluência" | "Projeto" | "Gui
 const MOCK_NOTES: Note[] = [
   {
     type: "Fluência",
-    problem: "'Eu não posso' → 'Não posso'",
-    suggestion: "Em português falado, omitir o sujeito soa mais natural.",
+    problem: "Omitir 'Eu' soa mais natural",
+    suggestion:
+      "Em legendas e textos informais, o sujeito explícito ('Eu') pode ser omitido para soar mais próximo da fala oral.",
   },
   {
     type: "Semântica",
     problem: "'aquilo' → 'isso'",
-    suggestion: "'Isso' funciona melhor para ações imediatas/contextuais.",
+    suggestion:
+      "'Isso' é mais adequado para ações imediatas e contextualmente próximas. 'Aquilo' indica distância, o que não é o caso aqui.",
   },
 ];
 
@@ -45,8 +48,10 @@ function RevisorPage() {
     projeto: false,
     guia: false,
   });
-  const [hasProject] = useState(true);
-  const [hasStyleGuide] = useState(false);
+  const activeProject = useActiveProject();
+  const hasProject = !!activeProject;
+  const [styleGuideName, setStyleGuideName] = useState<string | null>(null);
+  const hasStyleGuide = !!styleGuideName;
   const [status, setStatus] = useState<"idle" | "analyzing" | "done">("idle");
 
   const availableChecks: Check[] = [
@@ -58,6 +63,12 @@ function RevisorPage() {
   ];
 
   const toggle = (id: CheckId) => setChecks((c) => ({ ...c, [id]: !c[id] }));
+
+  const handleFile = (f: File | null) => {
+    if (!f) return;
+    setFileName(f.name);
+    if (/\.(pdf|docx?|md|txt)$/i.test(f.name)) setStyleGuideName(f.name);
+  };
 
   const analyze = () => {
     if (!text.trim()) return;
@@ -81,7 +92,7 @@ function RevisorPage() {
             if (status === "done") setStatus("idle");
           }}
           rows={6}
-          placeholder="Cole o texto para revisar..."
+          placeholder="Cole aqui o texto que você quer revisar..."
           className="w-full bg-white/60 rounded-2xl p-4 text-sm outline-none resize-none placeholder:text-muted-foreground"
         />
         <div className="flex flex-wrap items-center justify-between gap-3 mt-3">
@@ -91,11 +102,11 @@ function RevisorPage() {
             <input
               type="file"
               className="hidden"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
             />
           </label>
           <div className="text-xs text-muted-foreground">
-            {text.trim().split(/\s+/).filter(Boolean).length} palavras
+            {text.trim().split(/\s+/).filter(Boolean).length} palavras · {text.length} caracteres
           </div>
         </div>
       </section>
@@ -123,7 +134,7 @@ function RevisorPage() {
                     ? "bg-gradient-to-r from-pink-200 to-purple-200 text-purple-900 border-white/50 shadow-sm"
                     : c.available
                       ? "glass text-muted-foreground hover:text-foreground border-transparent"
-                      : "bg-white/30 text-muted-foreground/60 border-transparent cursor-not-allowed"
+                      : "bg-white/30 text-muted-foreground/50 border-transparent cursor-not-allowed opacity-60"
                 }`}
               >
                 {c.label}
@@ -137,11 +148,11 @@ function RevisorPage() {
         <button
           onClick={analyze}
           disabled={status === "analyzing" || !text.trim()}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-foreground text-background text-sm font-medium hover:opacity-90 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-400 to-purple-400 text-white text-sm font-medium hover:opacity-90 shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {status === "analyzing" ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Analisando…
+              <DotsPulse /> Analisando…
             </>
           ) : (
             <>
@@ -153,12 +164,17 @@ function RevisorPage() {
 
       {/* Analyzing state */}
       {status === "analyzing" && (
-        <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-3 animate-fade-in">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-white animate-spin" />
+        <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-4 animate-fade-in relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_1.8s_infinite]" />
+          <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm">
+            <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <div className="text-sm font-medium">Analisando seu texto…</div>
-          <div className="text-xs text-muted-foreground">Conferindo gramática, semântica e fluência.</div>
+          <div className="relative text-sm font-medium flex items-center gap-2">
+            Analisando seu texto <DotsPulse />
+          </div>
+          <div className="relative text-xs text-muted-foreground">
+            Conferindo gramática, semântica e fluência.
+          </div>
         </section>
       )}
 
@@ -207,14 +223,26 @@ function RevisorPage() {
 
       {/* Idle empty hint */}
       {status === "idle" && (
-        <section className="glass rounded-3xl p-10 text-center text-sm text-muted-foreground">
-          Suas sugestões aparecerão aqui depois da revisão.
+        <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-3 text-center">
+          <div className="w-12 h-12 rounded-2xl bg-white/60 flex items-center justify-center">
+            <Search className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <div className="text-sm text-muted-foreground">
+            Suas sugestões aparecerão aqui depois da revisão.
+          </div>
         </section>
       )}
-
-      {/* Reference to silence unused warning on SAMPLE_FIXED if ever needed */}
-      <span className="hidden">{SAMPLE_FIXED}</span>
     </AppShell>
+  );
+}
+
+function DotsPulse() {
+  return (
+    <span className="inline-flex gap-1 items-center">
+      <span className="w-1.5 h-1.5 rounded-full bg-current animate-bounce" />
+      <span className="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:120ms]" />
+      <span className="w-1.5 h-1.5 rounded-full bg-current animate-bounce [animation-delay:240ms]" />
+    </span>
   );
 }
 
