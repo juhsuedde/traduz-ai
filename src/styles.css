@@ -104,6 +104,14 @@
   --glass-bg: oklch(1 0 0 / 0.55);
   --glass-border: oklch(1 0 0 / 0.6);
   --glass-shadow: 0 8px 32px -8px oklch(0.6 0.1 300 / 0.25);
+
+  /* Cores dos domínios — pastel */
+  --domain-audiovisual: #ffb5a7;
+  --domain-literaria: #c9b1ff;
+  --domain-games: #a8e6cf;
+  --domain-tecnica: #a0c4ff;
+  --domain-juridica: #ffd6a5;
+  --domain-geral: #e2e8f0;
 }
 
 .dark {
@@ -177,4 +185,22 @@
     border: 1px solid oklch(1 0 0 / 0.7);
     box-shadow: var(--glass-shadow);
   }
+  .card-hover {
+    transition: transform 0.2s ease, box-shadow 0.25s ease;
+  }
+  .card-hover:hover {
+    transform: scale(1.02);
+    box-shadow: 0 14px 40px -12px oklch(0.6 0.1 300 / 0.35);
+  }
+  .domain-audiovisual { background-color: var(--domain-audiovisual); color: #7a2f24; }
+  .domain-literaria { background-color: var(--domain-literaria); color: #3d2a7a; }
+  .domain-games { background-color: var(--domain-games); color: #1f5b46; }
+  .domain-tecnica { background-color: var(--domain-tecnica); color: #1f3a7a; }
+  .domain-juridica { background-color: var(--domain-juridica); color: #7a4a14; }
+  .domain-geral { background-color: var(--domain-geral); color: #475569; }
+}
+
+@keyframes dot-bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-4px); opacity: 1; }
 }
