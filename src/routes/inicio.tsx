@@ -125,6 +125,11 @@ function ChatPage() {
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+          {messages.length === 0 && (
+            <div className="m-auto text-center text-sm text-muted-foreground">
+              Envie um texto para começar a traduzir 👇
+            </div>
+          )}
           {messages.map((m, i) => (
             <Bubble key={i} message={m} />
           ))}
@@ -202,7 +207,7 @@ function Bubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
   if (!message.content) return null;
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex animate-fade-in ${isUser ? "justify-end" : "justify-start"}`}>
       <div
         className={`max-w-[80%] px-5 py-3 rounded-3xl text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
