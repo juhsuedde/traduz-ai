@@ -19,7 +19,6 @@ type CheckId = "gramatica" | "semantica" | "fluencia" | "projeto" | "guia";
 type Check = { id: CheckId; label: string; available: boolean };
 
 const SAMPLE_ORIGINAL = "Eu não posso acreditar que você realmente fez aquilo.";
-const SAMPLE_FIXED = "Não posso acreditar que você realmente fez isso.";
 
 type Note = { type: "Gramática" | "Semântica" | "Fluência" | "Projeto" | "Guia"; problem: string; suggestion: string };
 
@@ -165,7 +164,7 @@ function RevisorPage() {
       {/* Analyzing state */}
       {status === "analyzing" && (
         <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-4 animate-fade-in relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_1.8s_infinite]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-pulse" />
           <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
