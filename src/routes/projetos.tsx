@@ -4,8 +4,6 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
 import {
-  DEFAULT_SETTINGS,
-  getProjectSettings,
   resetProjectSettings,
   setProjectSettings,
   useQuickSettings,
