@@ -2,70 +2,30 @@ export const currentUser = {
   name: "Ana",
   email: "ana@traduz.ai",
   initials: "AN",
-  role: "EN → ES · PT Translator",
+  role: "Tradutora EN → PT",
 };
 
 export type Project = {
   id: string;
   name: string;
-  client: string;
   domain: string;
-  languagePair: string;
-  progress: number;
-  words: number;
-  due: string;
-  status: "in-progress" | "review" | "done";
-  accent: string;
 };
 
 export const projects: Project[] = [
   {
     id: "p1",
-    name: "Aurora Skincare — Spring Campaign",
-    client: "Aurora Beauty Co.",
-    domain: "Marketing · Beauty",
-    languagePair: "EN → ES",
-    progress: 72,
-    words: 8420,
-    due: "May 30",
-    status: "in-progress",
-    accent: "from-pink-200/60 to-purple-200/60",
+    name: "Stranger Things S5",
+    domain: "Audiovisual",
   },
   {
     id: "p2",
-    name: "MedCore Patient Handbook",
-    client: "MedCore Health",
-    domain: "Medical · Healthcare",
-    languagePair: "EN → PT",
-    progress: 35,
-    words: 14200,
-    due: "Jun 12",
-    status: "in-progress",
-    accent: "from-mint-200/60 to-sky-200/60",
+    name: "A Biblioteca da Meia-Noite",
+    domain: "Literária",
   },
   {
     id: "p3",
-    name: "Nimbus App Localization v2.4",
-    client: "Nimbus Studio",
-    domain: "Software · UI Strings",
-    languagePair: "EN → ES",
-    progress: 100,
-    words: 3120,
-    due: "May 18",
-    status: "done",
-    accent: "from-sky-200/60 to-lavender-200/60",
-  },
-  {
-    id: "p4",
-    name: "Bloom Legal — Terms of Service",
-    client: "Bloom Legal",
-    domain: "Legal · Contracts",
-    languagePair: "EN → PT",
-    progress: 58,
-    words: 6740,
-    due: "Jun 4",
-    status: "review",
-    accent: "from-amber-100/60 to-pink-200/60",
+    name: "Stardew Valley",
+    domain: "Games",
   },
 ];
 
@@ -79,42 +39,7 @@ export type Conversation = {
   messages: ChatMessage[];
 };
 
-export const conversations: Conversation[] = [
-  {
-    id: "c1",
-    title: "Tone check for skincare hero copy",
-    project: "Aurora Skincare",
-    updated: "10 min ago",
-    preview: "Could you make it feel a bit more playful but…",
-    messages: [
-      { role: "user", content: "Help me translate this hero headline keeping a playful tone: 'Glow like you mean it.'" },
-      { role: "assistant", content: "Here are three options in Spanish:\n\n1. Brilla como si nada\n2. Brilla con intención\n3. Resplandece a tu manera\n\nOption 1 feels the most playful and youthful — perfect for a campaign aimed at Gen Z." },
-      { role: "user", content: "Love #1. Can you adapt it for Portuguese as well?" },
-    ],
-  },
-  {
-    id: "c2",
-    title: "Medical terminology — dosage instructions",
-    project: "MedCore Handbook",
-    updated: "Yesterday",
-    preview: "What's the standard PT-BR phrasing for 'as needed'?",
-    messages: [
-      { role: "user", content: "What's the standard PT-BR phrasing for 'take as needed'?" },
-      { role: "assistant", content: "The accepted clinical phrasing is 'tomar conforme a necessidade' or the abbreviated 'S/N' on prescriptions. Avoid 'quando precisar' in formal medical contexts." },
-    ],
-  },
-  {
-    id: "c3",
-    title: "Legal — liability clause review",
-    project: "Bloom Legal ToS",
-    updated: "2 days ago",
-    preview: "Double-check this rendering preserves limitation of…",
-    messages: [
-      { role: "user", content: "Does this translation preserve the limitation of liability properly?" },
-      { role: "assistant", content: "Yes, the structure holds, but consider replacing 'responsabilidade' with 'responsabilização' in clause 4.2 for stricter legal parallelism." },
-    ],
-  },
-];
+export const conversations: Conversation[] = [];
 
 export type GlossaryEntry = {
   id: string;
