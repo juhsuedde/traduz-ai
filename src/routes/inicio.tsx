@@ -2,8 +2,15 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { projects, type ChatMessage } from "@/lib/mock-data";
-import { Send, Paperclip, Image as ImageIcon, ChevronDown, Sparkles } from "lucide-react";
+import { Send, Paperclip, Image as ImageIcon, ChevronDown, Sparkles, SlidersHorizontal, X } from "lucide-react";
 import { setActiveProject } from "@/lib/active-project-store";
+import { QuickSettingsPanel } from "@/components/quick-settings-panel";
+import {
+  setProjectSettings,
+  setSessionSettings,
+  shortLabel,
+  useQuickSettings,
+} from "@/lib/quick-settings";
 
 export const Route = createFileRoute("/inicio")({
   head: () => ({
@@ -37,9 +44,12 @@ function ChatPage() {
   const [domain, setDomain] = useState<(typeof DOMAINS)[number]>("Audiovisual");
   const [projectId, setProjectId] = useState<string>("none");
   const [typing, setTyping] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const activeProject = projects.find((p) => p.id === projectId);
+  const settings = useQuickSettings(activeProject ? activeProject.id : null);
+  const effectiveDomain = activeProject ? activeProject.domain : domain;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -52,6 +62,11 @@ function ChatPage() {
         : null,
     );
   }, [activeProject]);
+
+  const updateSettings = (s: typeof settings) => {
+    if (activeProject) setProjectSettings(activeProject.id, s);
+    else setSessionSettings(s);
+  };
 
   const send = () => {
     const text = input.trim();
@@ -118,10 +133,51 @@ function ChatPage() {
             </span>
           )}
 
+          <button
+            onClick={() => setSettingsOpen((v) => !v)}
+            className={`inline-flex items-center gap-2 text-xs font-medium pl-3 pr-3 py-2 rounded-2xl transition ${
+              settingsOpen
+                ? "bg-gradient-to-r from-pink-200 to-purple-200 text-purple-950"
+                : "bg-white/70 hover:bg-white text-foreground"
+            }`}
+            aria-label="Ajustes rápidos"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>{shortLabel(settings)}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition ${settingsOpen ? "rotate-180" : ""}`} />
+          </button>
+
           <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
             <Sparkles className="w-3.5 h-3.5" /> traduz.ai
           </div>
         </div>
+
+        {settingsOpen && (
+          <div className="px-5 py-4 border-b border-white/40 bg-white/30 animate-fade-in">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="text-sm font-medium">Ajustes rápidos</div>
+              <button
+                onClick={() => setSettingsOpen(false)}
+                className="w-7 h-7 rounded-lg hover:bg-white/70 text-muted-foreground flex items-center justify-center"
+                aria-label="Fechar"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <QuickSettingsPanel
+              value={settings}
+              onChange={updateSettings}
+              domain={effectiveDomain}
+              projectName={activeProject?.name ?? null}
+              projectContext={null}
+              helperText={
+                activeProject
+                  ? `Alterações são salvas automaticamente no projeto "${activeProject.name}".`
+                  : "Sem projeto selecionado — os ajustes valem só para esta sessão."
+              }
+            />
+          </div>
+        )}
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">

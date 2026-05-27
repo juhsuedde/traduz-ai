@@ -2,6 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
+import { QuickSettingsPanel } from "@/components/quick-settings-panel";
+import {
+  resetProjectSettings,
+  setProjectSettings,
+  useQuickSettings,
+} from "@/lib/quick-settings";
 import {
   Plus,
   FileCheck2,
@@ -468,9 +474,10 @@ function ProjectDetailModal({
   project: ContextProject;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<"visao" | "glossario" | "guia">("visao");
+  const [tab, setTab] = useState<"visao" | "ajustes" | "glossario" | "guia">("visao");
   const [query, setQuery] = useState("");
   const style = DOMAIN_STYLES[project.domain];
+  const settings = useQuickSettings(project.id);
 
   const filteredGloss = project.glossary.filter(
     (g) =>
@@ -495,6 +502,7 @@ function ProjectDetailModal({
         <div className="inline-flex bg-white/60 rounded-full p-1 text-xs font-medium self-start">
           {[
             { id: "visao", label: "Visão geral" },
+            { id: "ajustes", label: "Ajustes de tradução" },
             { id: "glossario", label: "Glossário" },
             { id: "guia", label: "Guia de estilo" },
           ].map((t) => (
@@ -518,6 +526,18 @@ function ProjectDetailModal({
             <Section title="Sinopse">{project.synopsis || "—"}</Section>
             <Section title="Personagens">{project.characters || "—"}</Section>
           </div>
+        )}
+
+        {tab === "ajustes" && (
+          <QuickSettingsPanel
+            value={settings}
+            onChange={(s) => setProjectSettings(project.id, s)}
+            onReset={() => resetProjectSettings(project.id)}
+            domain={project.domain}
+            projectName={project.name}
+            projectContext={project.synopsis}
+            helperText="Esses ajustes serão aplicados automaticamente quando você usar este projeto no chat."
+          />
         )}
 
         {tab === "glossario" && (
