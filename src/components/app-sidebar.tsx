@@ -43,6 +43,18 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const activeProject = useActiveProject();
+  const activeSettings = useQuickSettings(activeProject?.id ?? null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (!profileRef.current?.contains(e.target as Node)) setProfileOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [profileOpen]);
 
   return (
     <div className="flex flex-col gap-3 h-full">
@@ -56,7 +68,7 @@ function SidebarContent({
             <div className="font-semibold tracking-tight text-foreground truncate">
               traduz<span className="text-primary">.ai</span>
             </div>
-            <div className="text-xs text-muted-foreground truncate">para tradutores</div>
+            <div className="text-xs text-muted-foreground truncate">assistente para tradutores</div>
           </div>
         )}
       </div>
