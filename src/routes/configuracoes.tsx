@@ -24,9 +24,7 @@ import {
   Download,
   ExternalLink,
 } from "lucide-react";
-import {
-  QuickSettingsPanel,
-} from "@/components/quick-settings-panel";
+import { QuickSettingsPanel } from "@/components/quick-settings-panel";
 import {
   getGlobalDefaults,
   setGlobalDefaults,
@@ -45,14 +43,7 @@ export const Route = createFileRoute("/configuracoes")({
   component: ConfiguracoesPage,
 });
 
-const DOMAIN_OPTIONS = [
-  "Audiovisual",
-  "Literária",
-  "Games",
-  "Técnica",
-  "Jurídica",
-  "Último usado",
-];
+const DOMAIN_OPTIONS = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica", "Último usado"];
 
 type Density = "compacto" | "confortavel" | "espacoso";
 
@@ -62,9 +53,7 @@ function ConfiguracoesPage() {
   const [profileRole, setProfileRole] = useState(currentUser.role);
 
   const [defaultDomain, setDefaultDomain] = useState("Último usado");
-  const [globalSettings, setGlobalSettings] = useState<QuickSettings>(() =>
-    getGlobalDefaults(),
-  );
+  const [globalSettings, setGlobalSettings] = useState<QuickSettings>(() => getGlobalDefaults());
 
   const [darkMode, setDarkMode] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -95,9 +84,7 @@ function ConfiguracoesPage() {
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight text-foreground">
             Configurações
           </h1>
-          <p className="text-muted-foreground mt-2 text-base">
-            Personalize sua experiência
-          </p>
+          <p className="text-muted-foreground mt-2 text-base">Personalize sua experiência</p>
         </div>
       </header>
 
@@ -116,9 +103,7 @@ function ConfiguracoesPage() {
                 {profileRole}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {currentUser.email}
-            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">{currentUser.email}</p>
             <button
               onClick={() => setProfileOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-white/70 hover:bg-white transition"
@@ -148,7 +133,12 @@ function ConfiguracoesPage() {
           </select>
           <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-              <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M1 1.5L6 6.5L11 1.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
           </div>
         </div>
@@ -160,8 +150,8 @@ function ConfiguracoesPage() {
         title="Ajustes padrão para novos projetos"
       >
         <p className="text-sm text-muted-foreground mb-4">
-          Quando você criar um novo projeto, ele começará com esses ajustes.
-          Você pode alterar depois em cada projeto.
+          Quando você criar um novo projeto, ele começará com esses ajustes. Você pode alterar
+          depois em cada projeto.
         </p>
         <QuickSettingsPanel
           value={globalSettings}
@@ -252,8 +242,7 @@ function ConfiguracoesPage() {
       <SectionCard icon={<Info className="w-5 h-5" />} title="Sobre">
         <div className="flex flex-col gap-3 text-sm text-muted-foreground">
           <p>
-            <span className="text-foreground font-medium">Versão:</span>{" "}
-            traduz.ai v1.0
+            <span className="text-foreground font-medium">Versão:</span> traduz.ai v1.0
           </p>
           <div className="flex flex-wrap gap-4">
             <a
@@ -292,9 +281,7 @@ function ConfiguracoesPage() {
             </div>
             <div className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Nome
-                </label>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">Nome</label>
                 <input
                   value={profileName}
                   onChange={(e) => setProfileName(e.target.value)}
@@ -375,18 +362,13 @@ function ToggleRow({
       <div className="flex items-center gap-2">
         {icon && <span className="text-muted-foreground">{icon}</span>}
         <span className="text-sm">
-          {label}{" "}
-          {note && (
-            <span className="text-xs text-muted-foreground">{note}</span>
-          )}
+          {label} {note && <span className="text-xs text-muted-foreground">{note}</span>}
         </span>
       </div>
       <button
         onClick={() => onChange(!checked)}
         className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${
-          checked
-            ? "bg-gradient-to-r from-pink-400 to-purple-400"
-            : "bg-white/70"
+          checked ? "bg-gradient-to-r from-pink-400 to-purple-400" : "bg-white/70"
         }`}
         aria-pressed={checked}
       >

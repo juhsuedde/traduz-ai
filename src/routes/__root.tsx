@@ -76,7 +76,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "Assistente inteligente para tradutores profissionais." },
       { name: "author", content: "traduz.ai" },
       { property: "og:title", content: "traduz.ai — Assistente para tradutores" },
-      { property: "og:description", content: "Assistente inteligente para tradutores profissionais." },
+      {
+        property: "og:description",
+        content: "Assistente inteligente para tradutores profissionais.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@traduzai" },

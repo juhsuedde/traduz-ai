@@ -9,7 +9,16 @@ import {
   type QuickSettings,
   type Tom,
 } from "@/lib/quick-settings";
-import { MessageSquareQuote, Globe2, Target, RotateCcw, Save, ChevronDown, ChevronUp, Lock } from "lucide-react";
+import {
+  MessageSquareQuote,
+  Globe2,
+  Target,
+  RotateCcw,
+  Save,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+} from "lucide-react";
 
 type Props = {
   value: QuickSettings;
@@ -50,9 +59,7 @@ export function QuickSettingsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {helperText && (
-        <p className="text-xs text-muted-foreground">{helperText}</p>
-      )}
+      {helperText && <p className="text-xs text-muted-foreground">{helperText}</p>}
 
       <SliderCard
         icon={<MessageSquareQuote className="w-4 h-4" />}
@@ -124,7 +131,7 @@ export function QuickSettingsPanel({
               Prompt usado pela IA (somente leitura)
             </div>
             <pre className="text-xs leading-relaxed whitespace-pre-wrap bg-white/70 rounded-xl p-3 text-foreground/80 font-sans">
-{buildPrompt({ domain, settings: value, projectName, projectContext })}
+              {buildPrompt({ domain, settings: value, projectName, projectContext })}
             </pre>
           </div>
         )}
@@ -168,7 +175,10 @@ function SliderCard({
             width: `calc(${(index / (options.length - 1)) * 100}% - ${(index / (options.length - 1)) * 24}px)`,
           }}
         />
-        <div className="relative grid" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
+        <div
+          className="relative grid"
+          style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}
+        >
           {options.map((o, i) => {
             const active = i === index;
             return (
@@ -186,7 +196,9 @@ function SliderCard({
                       : "bg-white/70 border-white/80 group-hover:border-purple-200"
                   }`}
                 />
-                <span className={`text-[11px] text-center leading-tight ${active ? "font-medium text-foreground" : ""}`}>
+                <span
+                  className={`text-[11px] text-center leading-tight ${active ? "font-medium text-foreground" : ""}`}
+                >
                   {o.label}
                 </span>
               </button>

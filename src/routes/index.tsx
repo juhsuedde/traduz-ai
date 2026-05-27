@@ -1,14 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import {
-  Clapperboard,
-  BookOpen,
-  Gamepad2,
-  Cog,
-  Scale,
-  ArrowRight,
-  Sparkles,
-} from "lucide-react";
+import { Clapperboard, BookOpen, Gamepad2, Cog, Scale, ArrowRight, Sparkles } from "lucide-react";
 import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -123,7 +115,8 @@ function LandingPage() {
               O que você vai traduzir hoje?
             </h1>
             <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto">
-              Escolha um domínio para personalizar sua experiência — terminologia, sugestões e recursos serão ajustados automaticamente.
+              Escolha um domínio para personalizar sua experiência — terminologia, sugestões e
+              recursos serão ajustados automaticamente.
             </p>
           </div>
 
@@ -145,17 +138,10 @@ function LandingPage() {
                   <div
                     className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 bg-gradient-to-br ${domain.accentGradient} shadow-sm`}
                   >
-                    <Icon
-                      className="w-7 h-7"
-                      style={{ color: domain.accent }}
-                    />
+                    <Icon className="w-7 h-7" style={{ color: domain.accent }} />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
-                    {domain.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {domain.description}
-                  </p>
+                  <h3 className="text-lg font-semibold text-foreground mb-1">{domain.name}</h3>
+                  <p className="text-sm text-muted-foreground">{domain.description}</p>
                   <div className="mt-4 flex items-center gap-1 text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                     <span>Selecionar</span>
                     <ArrowRight className="w-4 h-4" />
@@ -173,9 +159,7 @@ function LandingPage() {
             >
               Ou comece a traduzir agora
             </Link>
-            <p className="text-xs text-muted-foreground">
-              Você pode mudar isso a qualquer momento
-            </p>
+            <p className="text-xs text-muted-foreground">Você pode mudar isso a qualquer momento</p>
           </div>
         </div>
       </div>

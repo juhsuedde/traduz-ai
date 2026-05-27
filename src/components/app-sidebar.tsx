@@ -23,7 +23,12 @@ import { shortLabel, useQuickSettings } from "@/lib/quick-settings";
 
 const items = [
   { title: "Início", url: "/inicio", icon: MessageCircle, accent: "from-pink-300 to-purple-300" },
-  { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-purple-300 to-violet-300" },
+  {
+    title: "Projetos",
+    url: "/projetos",
+    icon: FolderOpen,
+    accent: "from-purple-300 to-violet-300",
+  },
   { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
 ] as const;
 
@@ -59,7 +64,9 @@ function SidebarContent({
   return (
     <div className="flex flex-col gap-3 h-full">
       {/* Logo */}
-      <div className={`glass rounded-3xl flex items-center gap-3 ${collapsed ? "p-3 justify-center" : "p-5"}`}>
+      <div
+        className={`glass rounded-3xl flex items-center gap-3 ${collapsed ? "p-3 justify-center" : "p-5"}`}
+      >
         <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm shrink-0">
           <Sparkles className="w-5 h-5 text-white" />
         </div>
@@ -271,7 +278,11 @@ export function AppSidebar() {
           aria-label={collapsed ? "Expandir menu" : "Recolher menu"}
           title={collapsed ? "Expandir" : "Recolher"}
         >
-          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+          {collapsed ? (
+            <ChevronRight className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronLeft className="w-3.5 h-3.5" />
+          )}
         </button>
       </aside>
 

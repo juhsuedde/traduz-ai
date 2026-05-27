@@ -20,7 +20,11 @@ type Check = { id: CheckId; label: string; available: boolean };
 
 const SAMPLE_ORIGINAL = "Eu não posso acreditar que você realmente fez aquilo.";
 
-type Note = { type: "Gramática" | "Semântica" | "Fluência" | "Projeto" | "Guia"; problem: string; suggestion: string };
+type Note = {
+  type: "Gramática" | "Semântica" | "Fluência" | "Projeto" | "Guia";
+  problem: string;
+  suggestion: string;
+};
 
 const MOCK_NOTES: Note[] = [
   {

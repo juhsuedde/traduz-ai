@@ -59,15 +59,19 @@ const TYPE_BADGES: Record<SuggestionType, { bg: string; text: string }> = {
   "Melhoria na inteligência da IA": { bg: "bg-[#c9b1ff]/60", text: "text-[#3d2a7a]" },
   "Novo conteúdo para Ajustes Rápidos": { bg: "bg-[#ffb5a7]/60", text: "text-[#7a2f24]" },
   "Novo domínio de tradução": { bg: "bg-[#a8e6cf]/60", text: "text-[#1f5b46]" },
-  "Outro": { bg: "bg-[#e2e8f0]/80", text: "text-[#475569]" },
+  Outro: { bg: "bg-[#e2e8f0]/80", text: "text-[#475569]" },
 };
 
 const STATUS_BADGES: Record<Status, { bg: string; text: string; icon?: React.ReactNode }> = {
   "Em análise": { bg: "bg-[#ffd6a5]/60", text: "text-[#7a4a14]" },
-  "Planejado": { bg: "bg-[#a0c4ff]/60", text: "text-[#1f3a7a]" },
+  Planejado: { bg: "bg-[#a0c4ff]/60", text: "text-[#1f3a7a]" },
   "Em desenvolvimento": { bg: "bg-[#c9b1ff]/60", text: "text-[#3d2a7a]" },
-  "Implementado": { bg: "bg-[#a8e6cf]/60", text: "text-[#1f5b46]", icon: <Check className="w-3 h-3" /> },
-  "Arquivado": { bg: "bg-[#e2e8f0]/80", text: "text-[#475569]" },
+  Implementado: {
+    bg: "bg-[#a8e6cf]/60",
+    text: "text-[#1f5b46]",
+    icon: <Check className="w-3 h-3" />,
+  },
+  Arquivado: { bg: "bg-[#e2e8f0]/80", text: "text-[#475569]" },
 };
 
 const MOCK_HISTORY: Suggestion[] = [
@@ -89,8 +93,7 @@ const MOCK_HISTORY: Suggestion[] = [
     type: "Melhoria na inteligência da IA",
     description:
       "Textos britânicos usam expressões como 'chuffed', 'gobsmacked', 'knackered'. A IA às vezes traduz literalmente. Seria ótimo se ela detectasse regionalismo britânico e adaptasse para equivalentes brasileiros.",
-    example:
-      "'I'm knackered' → 'Tô morto de cansaço' (não 'Estou ferrado de cansaço').",
+    example: "'I'm knackered' → 'Tô morto de cansaço' (não 'Estou ferrado de cansaço').",
     priority: "importante",
     date: "Enviada há 2 semanas",
     status: "Implementado",
@@ -143,13 +146,22 @@ function SugestoesPage() {
     setAttachment(null);
   };
 
-  const priorityMeta: Record<
-    Priority,
-    { label: string; icon: React.ReactNode; color: string }
-  > = {
-    legal: { label: "Seria legal ter", icon: <Smile className="w-4 h-4" />, color: "bg-[#a8e6cf]/60 text-[#1f5b46]" },
-    importante: { label: "Importante para meu trabalho", icon: <Meh className="w-4 h-4" />, color: "bg-[#ffd6a5]/60 text-[#7a4a14]" },
-    urgente: { label: "Urgente, não consigo sem isso", icon: <Frown className="w-4 h-4" />, color: "bg-[#ffb5a7]/60 text-[#7a2f24]" },
+  const priorityMeta: Record<Priority, { label: string; icon: React.ReactNode; color: string }> = {
+    legal: {
+      label: "Seria legal ter",
+      icon: <Smile className="w-4 h-4" />,
+      color: "bg-[#a8e6cf]/60 text-[#1f5b46]",
+    },
+    importante: {
+      label: "Importante para meu trabalho",
+      icon: <Meh className="w-4 h-4" />,
+      color: "bg-[#ffd6a5]/60 text-[#7a4a14]",
+    },
+    urgente: {
+      label: "Urgente, não consigo sem isso",
+      icon: <Frown className="w-4 h-4" />,
+      color: "bg-[#ffb5a7]/60 text-[#7a2f24]",
+    },
   };
 
   return (
@@ -191,7 +203,9 @@ function SugestoesPage() {
                 className="w-full bg-white/70 rounded-2xl px-4 py-2.5 text-sm border border-white/60 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-purple-200"
               >
                 <span>{type}</span>
-                <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`w-4 h-4 text-muted-foreground transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
+                />
               </button>
               {dropdownOpen && (
                 <div className="absolute z-10 mt-1 w-full glass-strong rounded-2xl overflow-hidden shadow-lg">
@@ -215,9 +229,7 @@ function SugestoesPage() {
 
             {/* Título */}
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">
-                Título
-              </label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Título</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -231,9 +243,7 @@ function SugestoesPage() {
 
             {/* Descrição */}
             <div>
-              <label className="text-sm font-medium text-foreground mb-1.5 block">
-                Descrição
-              </label>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Descrição</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -242,7 +252,8 @@ function SugestoesPage() {
                 className="w-full bg-white/70 rounded-2xl px-4 py-3 text-sm border border-white/60 focus:outline-none focus:ring-2 focus:ring-purple-200 resize-none placeholder:text-muted-foreground/60"
               />
               <p className="text-[11px] text-muted-foreground mt-1">
-                Quanto mais contexto, melhor! Explique o problema que isso resolveria ou a oportunidade que criaria.
+                Quanto mais contexto, melhor! Explique o problema que isso resolveria ou a
+                oportunidade que criaria.
               </p>
             </div>
 
@@ -330,9 +341,7 @@ function SugestoesPage() {
 
       {/* Histórico */}
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          Suas sugestões enviadas
-        </h2>
+        <h2 className="text-lg font-semibold flex items-center gap-2">Suas sugestões enviadas</h2>
 
         {history.length === 0 ? (
           <div className="glass rounded-3xl p-10 text-center flex flex-col items-center gap-3">
@@ -353,15 +362,10 @@ function SugestoesPage() {
               const typeStyle = TYPE_BADGES[s.type];
               const statusStyle = STATUS_BADGES[s.status];
               return (
-                <div
-                  key={s.id}
-                  className="glass rounded-3xl p-5 card-hover transition-all"
-                >
+                <div key={s.id} className="glass rounded-3xl p-5 card-hover transition-all">
                   <div className="flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-sm font-semibold leading-snug flex-1">
-                        {s.title}
-                      </h3>
+                      <h3 className="text-sm font-semibold leading-snug flex-1">{s.title}</h3>
                       <button
                         onClick={() => setExpandedId(expanded ? null : s.id)}
                         className="w-7 h-7 rounded-xl bg-white/50 hover:bg-white flex items-center justify-center text-muted-foreground transition shrink-0"
@@ -376,16 +380,18 @@ function SugestoesPage() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typeStyle.bg} ${typeStyle.text}`}>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${typeStyle.bg} ${typeStyle.text}`}
+                      >
                         {s.type}
                       </span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1 ${statusStyle.bg} ${statusStyle.text}`}>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1 ${statusStyle.bg} ${statusStyle.text}`}
+                      >
                         {statusStyle.icon}
                         {s.status}
                       </span>
-                      <span className="text-[11px] text-muted-foreground ml-auto">
-                        {s.date}
-                      </span>
+                      <span className="text-[11px] text-muted-foreground ml-auto">{s.date}</span>
                     </div>
 
                     {expanded && (

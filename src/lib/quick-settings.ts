@@ -26,14 +26,12 @@ export const TOM_OPTIONS: { value: Tom; label: string; instruction: string }[] =
   {
     value: "neutro",
     label: "Neutro",
-    instruction:
-      "Use linguagem natural e equilibrada, nem muito formal nem muito coloquial.",
+    instruction: "Use linguagem natural e equilibrada, nem muito formal nem muito coloquial.",
   },
   {
     value: "casual",
     label: "Casual",
-    instruction:
-      "Priorize linguagem próxima da fala oral, coloquial e espontânea.",
+    instruction: "Priorize linguagem próxima da fala oral, coloquial e espontânea.",
   },
 ];
 
@@ -66,14 +64,12 @@ export const FOCO_OPTIONS: { value: Foco; label: string; instruction: string }[]
   {
     value: "fidelidade",
     label: "Fidelidade ao original",
-    instruction:
-      "Priorize manter o sentido literal, estrutura e nuances do texto original.",
+    instruction: "Priorize manter o sentido literal, estrutura e nuances do texto original.",
   },
   {
     value: "equilibrado",
     label: "Equilibrado",
-    instruction:
-      "Equilibre fidelidade ao original com fluidez no idioma de destino.",
+    instruction: "Equilibre fidelidade ao original com fluidez no idioma de destino.",
   },
   {
     value: "naturalidade",
@@ -170,7 +166,7 @@ export function resetGlobalDefaults() {
 export function useQuickSettings(projectId: string | null): QuickSettings {
   return useSyncExternalStore(
     subscribe,
-    () => (projectId ? byProject[projectId] ?? globalDefaults : sessionSettings),
+    () => (projectId ? (byProject[projectId] ?? globalDefaults) : sessionSettings),
     () => DEFAULT_SETTINGS,
   );
 }

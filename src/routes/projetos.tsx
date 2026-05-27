@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
-import {
-  resetProjectSettings,
-  setProjectSettings,
-  useQuickSettings,
-} from "@/lib/quick-settings";
+import { resetProjectSettings, setProjectSettings, useQuickSettings } from "@/lib/quick-settings";
+import { getUserProjects, createProject, deleteProject } from "@/lib/api/projects.functions";
+import { getDomains } from "@/lib/api/projects.functions";
+import { useAuth } from "@/hooks/use-auth";
 import {
   Plus,
   FileCheck2,
@@ -16,10 +16,8 @@ import {
   MoreHorizontal,
   ArrowRight,
   X,
-  Upload,
   Trash2,
   Pencil,
-  Copy,
   Sparkles,
 } from "lucide-react";
 
@@ -49,88 +47,110 @@ type ContextProject = {
 };
 
 const DOMAIN_STYLES: Record<Domain, { badge: string; ring: string }> = {
-  Audiovisual: { badge: "bg-gradient-to-r from-rose-200 to-pink-200 text-rose-900", ring: "from-rose-200/70 to-pink-200/70" },
-  Literária:   { badge: "bg-gradient-to-r from-purple-200 to-violet-200 text-purple-900", ring: "from-purple-200/70 to-violet-200/70" },
-  Games:       { badge: "bg-gradient-to-r from-emerald-200 to-teal-200 text-emerald-900", ring: "from-emerald-200/70 to-teal-200/70" },
-  Técnica:     { badge: "bg-gradient-to-r from-sky-200 to-blue-200 text-sky-900", ring: "from-sky-200/70 to-blue-200/70" },
-  Jurídica:    { badge: "bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-900", ring: "from-amber-100/70 to-yellow-200/70" },
+  Audiovisual: {
+    badge: "bg-gradient-to-r from-rose-200 to-pink-200 text-rose-900",
+    ring: "from-rose-200/70 to-pink-200/70",
+  },
+  Literária: {
+    badge: "bg-gradient-to-r from-purple-200 to-violet-200 text-purple-900",
+    ring: "from-purple-200/70 to-violet-200/70",
+  },
+  Games: {
+    badge: "bg-gradient-to-r from-emerald-200 to-teal-200 text-emerald-900",
+    ring: "from-emerald-200/70 to-teal-200/70",
+  },
+  Técnica: {
+    badge: "bg-gradient-to-r from-sky-200 to-blue-200 text-sky-900",
+    ring: "from-sky-200/70 to-blue-200/70",
+  },
+  Jurídica: {
+    badge: "bg-gradient-to-r from-amber-100 to-yellow-200 text-amber-900",
+    ring: "from-amber-100/70 to-yellow-200/70",
+  },
 };
 
-const SEED: ContextProject[] = [
-  {
-    id: "p1",
-    name: "Stranger Things S5",
-    domain: "Audiovisual",
-    description: "Série de ficção científica da Netflix — temporada final",
-    synopsis:
-      "Hawkins enfrenta a invasão final do Mundo Invertido. Eleven recupera seus poderes e o grupo se reúne para encerrar a história.",
-    characters:
-      "Eleven: fala curta, direta, vocabulário simples. Dustin: sarcástico, gírias adolescentes. Hopper: tom paterno, frases curtas.",
-    glossary: Array.from({ length: 12 }).map((_, i) => ({
-      source: ["Mind Flayer", "Upside Down", "Demogorgon"][i % 3] + (i > 2 ? ` ${i}` : ""),
-      target: ["Devorador de Mentes", "Mundo Invertido", "Demogorgon"][i % 3],
-    })),
-    styleGuideFile: "netflix-style-guide.pdf",
-  },
-  {
-    id: "p2",
-    name: "A Biblioteca da Meia-Noite",
-    domain: "Literária",
-    description: "Romance de Matt Haig — edição brasileira",
-    synopsis:
-      "Nora Seed descobre uma biblioteca infinita entre a vida e a morte, onde cada livro é uma versão possível da sua vida.",
-    characters: "Nora: introspectiva, melancólica, narração em primeira pessoa fluida.",
-    glossary: Array.from({ length: 8 }).map((_, i) => ({
-      source: ["regret", "root life", "midnight"][i % 3] + (i > 2 ? ` ${i}` : ""),
-      target: ["arrependimento", "vida-raiz", "meia-noite"][i % 3],
-    })),
-    styleGuideFile: null,
-  },
-  {
-    id: "p3",
-    name: "Stardew Valley",
-    domain: "Games",
-    description: "RPG de simulação rural — atualização 1.6",
-    synopsis:
-      "Jogo de fazenda com elementos de RPG e simulação social. Atualização 1.6 adiciona novas plantações, festivais e diálogos.",
-    characters: "Diálogos curtos, tom acolhedor, sem palavrões. Manter trocadilhos quando possível.",
-    glossary: Array.from({ length: 24 }).map((_, i) => ({
-      source: ["Junimo", "Parsnip", "Stardrop"][i % 3] + (i > 2 ? ` ${i}` : ""),
-      target: ["Junimo", "Pastinaca", "Gota-estrela"][i % 3],
-    })),
-    styleGuideFile: "concernedape-loc.pdf",
-  },
-];
-
-const DOMAIN_OPTIONS: Domain[] = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica"];
+const DOMAIN_MAP: Record<string, Domain> = {
+  audiovisual: "Audiovisual",
+  literary: "Literária",
+  games: "Games",
+  technical: "Técnica",
+  legal: "Jurídica",
+};
 
 function ProjetosPage() {
-  const [projects, setProjects] = useState<ContextProject[]>(SEED);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [creating, setCreating] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
   const [menuFor, setMenuFor] = useState<string | null>(null);
 
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => getUserProjects({}),
+    enabled: !!user,
+  });
+
+  const { data: domains } = useQuery({
+    queryKey: ["domains"],
+    queryFn: () => getDomains({}),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: {
+      name: string;
+      domainId?: string;
+      description?: string;
+      synopsis?: string;
+      characters?: string;
+    }) => createProject({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (projectId: string) => deleteProject({ data: { projectId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+    },
+  });
+
+  const enrichedProjects = useMemo(() => {
+    if (!domains) return [];
+    return projects.map((p) => {
+      const domainSlug = domains.find((d) => d.id === p.domainId)?.slug;
+      const domainName: Domain = DOMAIN_MAP[domainSlug ?? ""] ?? "Audiovisual";
+      return {
+        id: p.id,
+        name: p.name,
+        domain: domainName,
+        description: p.description ?? "",
+        synopsis: p.synopsis ?? undefined,
+        characters: p.characters ?? undefined,
+        glossary: [] as GlossaryItem[],
+        styleGuideFile: p.styleGuideFilename ?? undefined,
+      };
+    });
+  }, [projects, domains]);
+
   const openProject = useMemo(
-    () => projects.find((p) => p.id === openId) ?? null,
-    [openId, projects],
+    () => enrichedProjects.find((p) => p.id === openId) ?? null,
+    [openId, enrichedProjects],
   );
 
-  const onCreate = (p: ContextProject) => {
-    setProjects((all) => [p, ...all]);
+  const handleCreate = (data: {
+    name: string;
+    domainId?: string;
+    description?: string;
+    synopsis?: string;
+    characters?: string;
+  }) => {
+    createMutation.mutate(data);
     setCreating(false);
   };
 
-  const onDuplicate = (id: string) => {
-    setProjects((all) => {
-      const p = all.find((x) => x.id === id);
-      if (!p) return all;
-      return [{ ...p, id: crypto.randomUUID(), name: `${p.name} (cópia)` }, ...all];
-    });
-    setMenuFor(null);
-  };
-
-  const onDelete = (id: string) => {
-    setProjects((all) => all.filter((p) => p.id !== id));
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
     setMenuFor(null);
   };
 
@@ -149,28 +169,34 @@ function ProjetosPage() {
         }
       />
 
-      {projects.length === 0 ? (
+      {isLoading ? (
+        <div className="text-center text-muted-foreground py-20">Carregando...</div>
+      ) : enrichedProjects.length === 0 ? (
         <EmptyState onCreate={() => setCreating(true)} />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {projects.map((p) => (
+          {enrichedProjects.map((p) => (
             <ProjectCard
               key={p.id}
               project={p}
               onOpen={() => setOpenId(p.id)}
               menuOpen={menuFor === p.id}
               onToggleMenu={() => setMenuFor(menuFor === p.id ? null : p.id)}
-              onDuplicate={() => onDuplicate(p.id)}
-              onDelete={() => onDelete(p.id)}
+              onDuplicate={() => {}}
+              onDelete={() => handleDelete(p.id)}
             />
           ))}
         </div>
       )}
 
-      {creating && <NewProjectModal onClose={() => setCreating(false)} onSave={onCreate} />}
-      {openProject && (
-        <ProjectDetailModal project={openProject} onClose={() => setOpenId(null)} />
+      {creating && (
+        <NewProjectModal
+          onClose={() => setCreating(false)}
+          onSave={handleCreate}
+          domains={domains ?? []}
+        />
       )}
+      {openProject && <ProjectDetailModal project={openProject} onClose={() => setOpenId(null)} />}
     </AppShell>
   );
 }
@@ -198,8 +224,12 @@ function ProjectCard({
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
-          <h3 className="font-semibold tracking-tight text-lg leading-snug truncate">{project.name}</h3>
-          <span className={`inline-block mt-2 text-xs px-3 py-1 rounded-full font-medium ${style.badge}`}>
+          <h3 className="font-semibold tracking-tight text-lg leading-snug truncate">
+            {project.name}
+          </h3>
+          <span
+            className={`inline-block mt-2 text-xs px-3 py-1 rounded-full font-medium ${style.badge}`}
+          >
             {project.domain}
           </span>
         </div>
@@ -219,9 +249,15 @@ function ProjectCard({
               onClick={(e) => e.stopPropagation()}
               className="absolute right-0 top-10 glass rounded-2xl p-1.5 min-w-[140px] shadow-md z-20"
             >
-              <MenuItem icon={<Pencil className="w-3.5 h-3.5" />} onClick={onDuplicate}>Editar</MenuItem>
-              <MenuItem icon={<Copy className="w-3.5 h-3.5" />} onClick={onDuplicate}>Duplicar</MenuItem>
-              <MenuItem icon={<Trash2 className="w-3.5 h-3.5" />} onClick={onDelete} danger>Excluir</MenuItem>
+              <MenuItem icon={<Pencil className="w-3.5 h-3.5" />} onClick={onDuplicate}>
+                Editar
+              </MenuItem>
+              <MenuItem icon={<Pencil className="w-3.5 h-3.5" />} onClick={onDuplicate}>
+                Duplicar
+              </MenuItem>
+              <MenuItem icon={<Trash2 className="w-3.5 h-3.5" />} onClick={onDelete} danger>
+                Excluir
+              </MenuItem>
             </div>
           )}
         </div>
@@ -264,8 +300,16 @@ function ProjectCard({
 }
 
 function MenuItem({
-  icon, children, onClick, danger,
-}: { icon: React.ReactNode; children: React.ReactNode; onClick: () => void; danger?: boolean }) {
+  icon,
+  children,
+  onClick,
+  danger,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  onClick: () => void;
+  danger?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
@@ -273,7 +317,8 @@ function MenuItem({
         danger ? "text-rose-600" : "text-foreground"
       }`}
     >
-      {icon}{children}
+      {icon}
+      {children}
     </button>
   );
 }
@@ -287,7 +332,8 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
       <div>
         <h3 className="text-lg font-semibold tracking-tight mb-1">Nenhum projeto ainda</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Crie um projeto para guardar contexto, personagens e glossários. O agente usará essas informações nas traduções.
+          Crie um projeto para guardar contexto, personagens e glossários. O agente usará essas
+          informações nas traduções.
         </p>
       </div>
       <button
@@ -305,33 +351,32 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
 function NewProjectModal({
   onClose,
   onSave,
+  domains,
 }: {
   onClose: () => void;
-  onSave: (p: ContextProject) => void;
+  onSave: (p: {
+    name: string;
+    domainId?: string;
+    description?: string;
+    synopsis?: string;
+    characters?: string;
+  }) => void;
+  domains: { id: string; slug: string; name: string }[];
 }) {
   const [name, setName] = useState("");
-  const [domain, setDomain] = useState<Domain>("Audiovisual");
+  const [domainId, setDomainId] = useState<string | undefined>(domains[0]?.id);
   const [description, setDescription] = useState("");
   const [synopsis, setSynopsis] = useState("");
   const [characters, setCharacters] = useState("");
-  const [glossary, setGlossary] = useState<GlossaryItem[]>([{ source: "", target: "", note: "" }]);
-  const [styleGuideFile, setStyleGuideFile] = useState<string | null>(null);
-
-  const updateGloss = (i: number, key: keyof GlossaryItem, val: string) => {
-    setGlossary((g) => g.map((it, idx) => (idx === i ? { ...it, [key]: val } : it)));
-  };
 
   const submit = () => {
     if (!name.trim()) return;
     onSave({
-      id: crypto.randomUUID(),
       name: name.trim(),
-      domain,
-      description: description.trim(),
-      synopsis: synopsis.trim(),
-      characters: characters.trim(),
-      glossary: glossary.filter((g) => g.source.trim() && g.target.trim()),
-      styleGuideFile,
+      domainId,
+      description: description.trim() || undefined,
+      synopsis: synopsis.trim() || undefined,
+      characters: characters.trim() || undefined,
     });
   };
 
@@ -349,12 +394,14 @@ function NewProjectModal({
 
         <Field label="Domínio">
           <select
-            value={domain}
-            onChange={(e) => setDomain(e.target.value as Domain)}
+            value={domainId}
+            onChange={(e) => setDomainId(e.target.value)}
             className="w-full bg-white/70 rounded-2xl px-4 py-3 text-sm outline-none focus:bg-white cursor-pointer"
           >
-            {DOMAIN_OPTIONS.map((d) => (
-              <option key={d}>{d}</option>
+            {domains.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
             ))}
           </select>
         </Field>
@@ -389,61 +436,11 @@ function NewProjectModal({
           />
         </Field>
 
-        <Field label="Glossário manual">
-          <div className="flex flex-col gap-2">
-            {glossary.map((g, i) => (
-              <div key={i} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1.2fr_auto] gap-2">
-                <input
-                  value={g.source}
-                  onChange={(e) => updateGloss(i, "source", e.target.value)}
-                  placeholder="Termo original"
-                  className="bg-white/70 rounded-xl px-3 py-2 text-sm outline-none focus:bg-white"
-                />
-                <input
-                  value={g.target}
-                  onChange={(e) => updateGloss(i, "target", e.target.value)}
-                  placeholder="Tradução"
-                  className="bg-white/70 rounded-xl px-3 py-2 text-sm outline-none focus:bg-white"
-                />
-                <input
-                  value={g.note ?? ""}
-                  onChange={(e) => updateGloss(i, "note", e.target.value)}
-                  placeholder="Notas (opcional)"
-                  className="bg-white/70 rounded-xl px-3 py-2 text-sm outline-none focus:bg-white"
-                />
-                <button
-                  onClick={() => setGlossary((g) => g.filter((_, idx) => idx !== i))}
-                  className="w-9 h-9 rounded-xl hover:bg-white/70 text-muted-foreground flex items-center justify-center"
-                  aria-label="Remover"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-            <button
-              onClick={() => setGlossary((g) => [...g, { source: "", target: "", note: "" }])}
-              className="self-start text-xs font-medium px-3 py-2 rounded-xl bg-white/60 hover:bg-white inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" /> Adicionar termo
-            </button>
-          </div>
-        </Field>
-
-        <Field label="Guia de estilo">
-          <label className="flex items-center gap-3 bg-white/70 rounded-2xl px-4 py-3 text-sm cursor-pointer hover:bg-white transition">
-            <Upload className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">
-              {styleGuideFile ? styleGuideFile : "Clique para anexar um PDF ou documento"}
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setStyleGuideFile(f.name);
-              }}
-            />
-          </label>
+        <Field label="Glossário e Guia de estilo" hint="Adicione após criar">
+          <p className="text-xs text-muted-foreground bg-white/50 rounded-2xl px-4 py-3">
+            Após criar o projeto, você poderá adicionar termos do glossário e anexar um guia de
+            estilo na página de detalhes.
+          </p>
         </Field>
 
         <div className="flex justify-end gap-2 pt-2">
@@ -553,7 +550,10 @@ function ProjectDetailModal({
                 <div className="p-6 text-center text-sm text-muted-foreground">Nenhum termo.</div>
               )}
               {filteredGloss.map((g, i) => (
-                <div key={i} className="px-4 py-3 grid grid-cols-1 md:grid-cols-[1fr_1fr_1.2fr] gap-2 text-sm">
+                <div
+                  key={i}
+                  className="px-4 py-3 grid grid-cols-1 md:grid-cols-[1fr_1fr_1.2fr] gap-2 text-sm"
+                >
                   <div className="font-medium">{g.source}</div>
                   <div className="text-muted-foreground">→ {g.target}</div>
                   <div className="text-xs text-muted-foreground">{g.note}</div>
@@ -614,8 +614,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 function Field({
-  label, hint, children,
-}: { label: string; hint?: string; children: React.ReactNode }) {
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-baseline justify-between">
@@ -630,8 +636,14 @@ function Field({
 /* ---------- Modal Shell ---------- */
 
 function ModalShell({
-  title, onClose, children,
-}: { title: React.ReactNode; onClose: () => void; children: React.ReactNode }) {
+  title,
+  onClose,
+  children,
+}: {
+  title: React.ReactNode;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />

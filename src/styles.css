@@ -164,7 +164,7 @@
       radial-gradient(at 20% 90%, var(--aurora-4) 0px, transparent 50%);
     background-attachment: fixed;
     min-height: 100vh;
-    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     line-height: 1.6;
   }
@@ -186,21 +186,49 @@
     box-shadow: var(--glass-shadow);
   }
   .card-hover {
-    transition: transform 0.2s ease, box-shadow 0.25s ease;
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.25s ease;
   }
   .card-hover:hover {
     transform: scale(1.02);
     box-shadow: 0 14px 40px -12px oklch(0.6 0.1 300 / 0.35);
   }
-  .domain-audiovisual { background-color: var(--domain-audiovisual); color: #7a2f24; }
-  .domain-literaria { background-color: var(--domain-literaria); color: #3d2a7a; }
-  .domain-games { background-color: var(--domain-games); color: #1f5b46; }
-  .domain-tecnica { background-color: var(--domain-tecnica); color: #1f3a7a; }
-  .domain-juridica { background-color: var(--domain-juridica); color: #7a4a14; }
-  .domain-geral { background-color: var(--domain-geral); color: #475569; }
+  .domain-audiovisual {
+    background-color: var(--domain-audiovisual);
+    color: #7a2f24;
+  }
+  .domain-literaria {
+    background-color: var(--domain-literaria);
+    color: #3d2a7a;
+  }
+  .domain-games {
+    background-color: var(--domain-games);
+    color: #1f5b46;
+  }
+  .domain-tecnica {
+    background-color: var(--domain-tecnica);
+    color: #1f3a7a;
+  }
+  .domain-juridica {
+    background-color: var(--domain-juridica);
+    color: #7a4a14;
+  }
+  .domain-geral {
+    background-color: var(--domain-geral);
+    color: #475569;
+  }
 }
 
 @keyframes dot-bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
-  40% { transform: translateY(-4px); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  40% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
 }

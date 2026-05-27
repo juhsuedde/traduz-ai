@@ -1,8 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
-import { projects, type ChatMessage } from "@/lib/mock-data";
-import { Send, Paperclip, Image as ImageIcon, ChevronDown, Sparkles, SlidersHorizontal, X } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useChat, type ChatMessage } from "@/hooks/use-chat";
+import { getUserProjects, getDomains } from "@/lib/api/projects.functions";
+import {
+  Send,
+  Paperclip,
+  Image as ImageIcon,
+  ChevronDown,
+  Sparkles,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { setActiveProject } from "@/lib/active-project-store";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
 import {
@@ -22,46 +33,74 @@ export const Route = createFileRoute("/inicio")({
   component: ChatPage,
 });
 
-const DOMAINS = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica"] as const;
+const DOMAIN_NAMES = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica"] as const;
 
-const INITIAL_MESSAGES: ChatMessage[] = [
-  { role: "user", content: "I can't believe you actually did that." },
-  { role: "assistant", content: "Não acredito que você realmente fez isso." },
-  { role: "user", content: "It's not like I had a choice." },
-  { role: "assistant", content: "Não é como se eu tivesse escolha." },
-];
+const SLUG_MAP: Record<string, string> = {
+  audiovisual: "Audiovisual",
+  literary: "Literária",
+  games: "Games",
+  technical: "Técnica",
+  legal: "Jurídica",
+};
 
-const MOCK_REPLIES = [
-  "Aqui vai uma sugestão natural em PT-BR, mantendo o tom original.",
-  "Tradução pronta — ajustei o ritmo para soar mais fluido em português.",
-  "Mantive o sentido original e suavizei a construção para o leitor brasileiro.",
-];
+const DOMAIN_TO_SLUG: Record<string, string> = {
+  Audiovisual: "audiovisual",
+  Literária: "literary",
+  Games: "games",
+  Técnica: "technical",
+  Jurídica: "legal",
+};
 
 function ChatPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
+  const { user } = useAuth();
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<"traducao" | "revisao">("traducao");
-  const [domain, setDomain] = useState<(typeof DOMAINS)[number]>("Audiovisual");
+  const [domain, setDomain] = useState<string>("Audiovisual");
   const [projectId, setProjectId] = useState<string>("none");
-  const [typing, setTyping] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const activeProject = projects.find((p) => p.id === projectId);
+  const projectSlug = DOMAIN_TO_SLUG[domain] ?? "audiovisual";
+
+  const { messages, sendMessage, isStreaming } = useChat({
+    userId: user?.id ?? "",
+    domainSlug: projectSlug,
+    projectId: projectId !== "none" ? projectId : undefined,
+    sessionType: mode === "revisao" ? "review" : "translation",
+  });
+
+  const { data: domainsList } = useQuery({
+    queryKey: ["domains"],
+    queryFn: () => getDomains({}),
+  });
+
+  const { data: projectsList } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => getUserProjects({}),
+    enabled: !!user,
+  });
+
+  const activeProject = projectsList?.find((p) => p.id === projectId);
   const settings = useQuickSettings(activeProject ? activeProject.id : null);
-  const effectiveDomain = activeProject ? activeProject.domain : domain;
+  const effectiveDomain = activeProject
+    ? (SLUG_MAP[domainsList?.find((d) => d.id === activeProject.domainId)?.slug ?? ""] ?? domain)
+    : domain;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, typing]);
+  }, [messages, isStreaming]);
 
   useEffect(() => {
     setActiveProject(
       activeProject
-        ? { id: activeProject.id, name: activeProject.name, domain: activeProject.domain }
+        ? {
+            id: activeProject.id,
+            name: activeProject.name,
+            domain: effectiveDomain,
+          }
         : null,
     );
-  }, [activeProject]);
+  }, [activeProject, effectiveDomain]);
 
   const updateSettings = (s: typeof settings) => {
     if (activeProject) setProjectSettings(activeProject.id, s);
@@ -70,29 +109,9 @@ function ChatPage() {
 
   const send = () => {
     const text = input.trim();
-    if (!text) return;
-    setMessages((m) => [...m, { role: "user", content: text }]);
+    if (!text || isStreaming) return;
     setInput("");
-    setTyping(true);
-    const reply = MOCK_REPLIES[Math.floor(Math.random() * MOCK_REPLIES.length)];
-    typeOut(reply);
-  };
-
-  const typeOut = (full: string) => {
-    let i = 0;
-    setMessages((m) => [...m, { role: "assistant", content: "" }]);
-    const interval = setInterval(() => {
-      i += 2;
-      setMessages((m) => {
-        const copy = [...m];
-        copy[copy.length - 1] = { role: "assistant", content: full.slice(0, i) };
-        return copy;
-      });
-      if (i >= full.length) {
-        clearInterval(interval);
-        setTyping(false);
-      }
-    }, 25);
+    sendMessage(text);
   };
 
   return (
@@ -103,11 +122,13 @@ function ChatPage() {
           <div className="relative">
             <select
               value={domain}
-              onChange={(e) => setDomain(e.target.value as (typeof DOMAINS)[number])}
+              onChange={(e) => setDomain(e.target.value)}
               className="appearance-none bg-white/70 hover:bg-white text-sm font-medium pl-4 pr-9 py-2 rounded-2xl outline-none cursor-pointer transition"
             >
-              {DOMAINS.map((d) => (
-                <option key={d} value={d}>{d}</option>
+              {DOMAIN_NAMES.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
               ))}
             </select>
             <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
@@ -120,8 +141,10 @@ function ChatPage() {
               className="appearance-none bg-white/70 hover:bg-white text-sm pl-4 pr-9 py-2 rounded-2xl outline-none cursor-pointer transition"
             >
               <option value="none">Nenhum projeto</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
+              {(projectsList ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
               ))}
             </select>
             <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground" />
@@ -193,7 +216,7 @@ function ChatPage() {
           {messages.map((m, i) => (
             <Bubble key={i} message={m} />
           ))}
-          {typing && messages[messages.length - 1]?.content === "" && (
+          {isStreaming && messages[messages.length - 1]?.content === "" && (
             <div className="flex justify-start">
               <div className="bg-white/80 rounded-3xl rounded-bl-md px-5 py-3 text-sm">
                 <span className="inline-flex gap-1">
@@ -213,7 +236,9 @@ function ChatPage() {
               <button
                 onClick={() => setMode("traducao")}
                 className={`px-4 py-1.5 rounded-full transition ${
-                  mode === "traducao" ? "bg-gradient-to-r from-pink-300 to-purple-300 text-white shadow-sm" : "text-muted-foreground"
+                  mode === "traducao"
+                    ? "bg-gradient-to-r from-pink-300 to-purple-300 text-white shadow-sm"
+                    : "text-muted-foreground"
                 }`}
               >
                 Modo Tradução
@@ -221,7 +246,9 @@ function ChatPage() {
               <button
                 onClick={() => setMode("revisao")}
                 className={`px-4 py-1.5 rounded-full transition ${
-                  mode === "revisao" ? "bg-gradient-to-r from-sky-300 to-teal-300 text-white shadow-sm" : "text-muted-foreground"
+                  mode === "revisao"
+                    ? "bg-gradient-to-r from-sky-300 to-teal-300 text-white shadow-sm"
+                    : "text-muted-foreground"
                 }`}
               >
                 Modo Revisão
@@ -230,10 +257,16 @@ function ChatPage() {
           </div>
 
           <div className="flex items-end gap-2 bg-white/70 rounded-2xl p-2 pl-3">
-            <button className="w-9 h-9 rounded-xl hover:bg-white/80 text-muted-foreground flex items-center justify-center transition shrink-0" aria-label="Anexar arquivo">
+            <button
+              className="w-9 h-9 rounded-xl hover:bg-white/80 text-muted-foreground flex items-center justify-center transition shrink-0"
+              aria-label="Anexar arquivo"
+            >
               <Paperclip className="w-4 h-4" />
             </button>
-            <button className="w-9 h-9 rounded-xl hover:bg-white/80 text-muted-foreground flex items-center justify-center transition shrink-0" aria-label="Anexar imagem">
+            <button
+              className="w-9 h-9 rounded-xl hover:bg-white/80 text-muted-foreground flex items-center justify-center transition shrink-0"
+              aria-label="Anexar imagem"
+            >
               <ImageIcon className="w-4 h-4" />
             </button>
             <textarea

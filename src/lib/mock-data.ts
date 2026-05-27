@@ -50,7 +50,19 @@ export type GlossaryEntry = {
 };
 
 export const glossary: GlossaryEntry[] = [
-  { id: "g1", source: "Mind Flayer", target: "Devorador de Mentes", note: "Manter o nome consagrado da dublagem.", tag: "Personagem" },
-  { id: "g2", source: "Upside Down", target: "Mundo Invertido", note: "Sempre com inicial maiúscula.", tag: "Universo" },
+  {
+    id: "g1",
+    source: "Mind Flayer",
+    target: "Devorador de Mentes",
+    note: "Manter o nome consagrado da dublagem.",
+    tag: "Personagem",
+  },
+  {
+    id: "g2",
+    source: "Upside Down",
+    target: "Mundo Invertido",
+    note: "Sempre com inicial maiúscula.",
+    tag: "Universo",
+  },
   { id: "g3", source: "Demogorgon", target: "Demogorgon", note: "Não traduzir.", tag: "Aprovado" },
 ];
