@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { MessageCircle, FolderOpen, PencilRuler, Sparkles, Menu, X } from "lucide-react";
+import { MessageCircle, FolderOpen, PencilRuler, Sparkles, Menu, X, Plus } from "lucide-react";
 import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
@@ -9,6 +9,13 @@ const items = [
   { title: "Projetos", url: "/projetos", icon: FolderOpen, accent: "from-sky-300 to-teal-300" },
   { title: "Revisor", url: "/revisor", icon: PencilRuler, accent: "from-amber-200 to-pink-300" },
 ] as const;
+
+const recentThreads = [
+  { id: "t1", title: "Tradução Stranger Things" },
+  { id: "t2", title: "Revisão texto marketing" },
+  { id: "t3", title: "Localização indie game" },
+  { id: "t4", title: "Contrato — cláusula 4.2" },
+];
 
 function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   return (
@@ -25,7 +32,7 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
         </div>
       </div>
 
-      <nav className="glass rounded-3xl p-3 flex flex-col gap-1 flex-1">
+      <nav className="glass rounded-3xl p-3 flex flex-col gap-1">
         {items.map((item) => {
           const active = pathname === item.url;
           return (
@@ -53,6 +60,32 @@ function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate
           );
         })}
       </nav>
+
+      <div className="glass rounded-3xl p-3 flex flex-col gap-1 flex-1 min-h-0">
+        <div className="flex items-center justify-between px-2 pt-1 pb-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Conversas recentes
+          </span>
+          <button
+            className="w-6 h-6 rounded-lg bg-white/60 hover:bg-white text-muted-foreground flex items-center justify-center transition"
+            aria-label="Nova conversa"
+          >
+            <Plus className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <div className="flex flex-col gap-0.5 overflow-y-auto pr-1">
+          {recentThreads.map((t) => (
+            <Link
+              key={t.id}
+              to="/inicio"
+              onClick={onNavigate}
+              className="px-3 py-2 rounded-xl text-xs text-muted-foreground hover:bg-white/40 hover:text-foreground transition truncate"
+            >
+              {t.title}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="glass rounded-3xl p-4 flex items-center gap-3">
         <Avatar className="w-10 h-10">
