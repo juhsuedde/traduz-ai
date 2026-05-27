@@ -188,7 +188,7 @@ function ProjectCard({
   return (
     <article
       onClick={onOpen}
-      className="glass rounded-3xl p-6 hover:bg-white/70 transition-all cursor-pointer relative"
+      className="glass card-hover rounded-3xl p-6 hover:bg-white/70 cursor-pointer relative animate-fade-in"
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
