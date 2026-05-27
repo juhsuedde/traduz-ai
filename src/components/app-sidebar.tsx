@@ -5,6 +5,7 @@ import {
   FolderOpen,
   PencilRuler,
   Settings,
+  Lightbulb,
   Sparkles,
   Menu,
   X,
