@@ -135,16 +135,20 @@ function ChatPage() {
 
           <button
             onClick={() => setSettingsOpen((v) => !v)}
-            className={`inline-flex items-center gap-2 text-xs font-medium pl-3 pr-3 py-2 rounded-2xl transition ${
+            className={`inline-flex items-center gap-2 text-xs font-medium rounded-2xl transition ${
               settingsOpen
-                ? "bg-gradient-to-r from-pink-200 to-purple-200 text-purple-950"
-                : "bg-white/70 hover:bg-white text-foreground"
+                ? "bg-gradient-to-r from-pink-200 to-purple-200 text-purple-950 pl-3 pr-3 py-2 gap-2"
+                : "bg-white/70 hover:bg-white text-foreground w-9 h-9 justify-center"
             }`}
             aria-label="Ajustes rápidos"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />
-            <span>{shortLabel(settings)}</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition ${settingsOpen ? "rotate-180" : ""}`} />
+            {settingsOpen && (
+              <>
+                <span>{shortLabel(settings)}</span>
+                <ChevronDown className="w-3.5 h-3.5 transition rotate-180" />
+              </>
+            )}
           </button>
 
           <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
