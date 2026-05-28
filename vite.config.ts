@@ -11,6 +11,16 @@ export default defineConfig({
     },
     plugins: [
       {
+        name: "favicon-dev",
+        apply: "serve",
+        configureServer(server) {
+          server.middlewares.use("/favicon.ico", (_req, res) => {
+            res.statusCode = 204;
+            res.end();
+          });
+        },
+      },
+      {
         name: "chat-stream-dev",
         apply: "serve",
         configureServer(server) {
