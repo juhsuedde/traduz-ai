@@ -13,7 +13,9 @@ import { Route as SugestoesRouteImport } from './routes/sugestoes'
 import { Route as RevisorRouteImport } from './routes/revisor'
 import { Route as ProjetosRouteImport } from './routes/projetos'
 import { Route as InicioRouteImport } from './routes/inicio'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as CadastrarRouteImport } from './routes/cadastrar'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SugestoesRoute = SugestoesRouteImport.update({
@@ -36,9 +38,19 @@ const InicioRoute = InicioRouteImport.update({
   path: '/inicio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CadastrarRoute = CadastrarRouteImport.update({
+  id: '/cadastrar',
+  path: '/cadastrar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,7 +61,9 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cadastrar': typeof CadastrarRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
@@ -57,7 +71,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cadastrar': typeof CadastrarRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
@@ -66,7 +82,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cadastrar': typeof CadastrarRoute
   '/configuracoes': typeof ConfiguracoesRoute
+  '/entrar': typeof EntrarRoute
   '/inicio': typeof InicioRoute
   '/projetos': typeof ProjetosRoute
   '/revisor': typeof RevisorRoute
@@ -76,7 +94,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cadastrar'
     | '/configuracoes'
+    | '/entrar'
     | '/inicio'
     | '/projetos'
     | '/revisor'
@@ -84,7 +104,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cadastrar'
     | '/configuracoes'
+    | '/entrar'
     | '/inicio'
     | '/projetos'
     | '/revisor'
@@ -92,7 +114,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/cadastrar'
     | '/configuracoes'
+    | '/entrar'
     | '/inicio'
     | '/projetos'
     | '/revisor'
@@ -101,7 +125,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CadastrarRoute: typeof CadastrarRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
+  EntrarRoute: typeof EntrarRoute
   InicioRoute: typeof InicioRoute
   ProjetosRoute: typeof ProjetosRoute
   RevisorRoute: typeof RevisorRoute
@@ -138,11 +164,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InicioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/configuracoes': {
       id: '/configuracoes'
       path: '/configuracoes'
       fullPath: '/configuracoes'
       preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cadastrar': {
+      id: '/cadastrar'
+      path: '/cadastrar'
+      fullPath: '/cadastrar'
+      preLoaderRoute: typeof CadastrarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -157,7 +197,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CadastrarRoute: CadastrarRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
+  EntrarRoute: EntrarRoute,
   InicioRoute: InicioRoute,
   ProjetosRoute: ProjetosRoute,
   RevisorRoute: RevisorRoute,

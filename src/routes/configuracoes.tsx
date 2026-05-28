@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 import {
   UserCircle,
   Globe,
@@ -23,6 +23,7 @@ import {
   Trash2,
   Download,
   ExternalLink,
+  LogIn,
 } from "lucide-react";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
 import {
@@ -48,9 +49,10 @@ const DOMAIN_OPTIONS = ["Audiovisual", "Literária", "Games", "Técnica", "Jurí
 type Density = "compacto" | "confortavel" | "espacoso";
 
 function ConfiguracoesPage() {
+  const { user } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [profileName, setProfileName] = useState(currentUser.name);
-  const [profileRole, setProfileRole] = useState(currentUser.role);
+  const [profileName, setProfileName] = useState(user?.name || "");
+  const [profileRole, setProfileRole] = useState("Tradutora EN → PT");
 
   const [defaultDomain, setDefaultDomain] = useState("Último usado");
   const [globalSettings, setGlobalSettings] = useState<QuickSettings>(() => getGlobalDefaults());
@@ -61,6 +63,26 @@ function ConfiguracoesPage() {
 
   const [emailNotif, setEmailNotif] = useState(true);
   const [weeklySummary, setWeeklySummary] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="max-w-3xl mx-auto w-full flex flex-col items-center justify-center gap-4 min-h-[50vh] animate-fade-in">
+        <div className="glass rounded-3xl p-8 card-hover text-center max-w-sm">
+          <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center mx-auto mb-4">
+            <LogIn className="w-6 h-6 text-white" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Faça login</h2>
+          <p className="text-sm text-muted-foreground mb-6">Entre na sua conta para acessar as configurações.</p>
+          <Link
+            to="/entrar"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-pink-400 to-purple-400 text-white hover:opacity-90 transition"
+          >
+            <LogIn className="w-4 h-4" /> Entrar
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveProfile = () => {
     setProfileOpen(false);
@@ -93,7 +115,7 @@ function ConfiguracoesPage() {
         <div className="flex items-start gap-4">
           <Avatar className="w-16 h-16 shrink-0">
             <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white text-lg font-semibold">
-              {currentUser.initials}
+              {(user.name || user.email).slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
@@ -103,7 +125,7 @@ function ConfiguracoesPage() {
                 {profileRole}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground mt-0.5">{currentUser.email}</p>
+            <p className="text-sm text-muted-foreground mt-0.5">{user.email}</p>
             <button
               onClick={() => setProfileOpen(true)}
               className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl bg-white/70 hover:bg-white transition"

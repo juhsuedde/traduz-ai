@@ -1,12 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import Anthropic from "@anthropic-ai/sdk";
 import { getCookie } from "@tanstack/react-start/server";
 import { db } from "../db";
 import { projects, glossaryEntries, styleGuides } from "../db/schema";
 import { eq } from "drizzle-orm";
-import process from "node:process";
 import { lucia } from "../auth/lucia";
+import { getOpenRouterClient, OPENROUTER_MODEL } from "./openrouter";
 
 async function getAuthUser() {
   const sessionId = getCookie("auth_session");
@@ -34,7 +33,7 @@ export const reviewText = createServerFn({ method: "POST" })
   .inputValidator(ReviewInputSchema)
   .handler(async ({ data }) => {
     const user = await getAuthUser();
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const openai = getOpenRouterClient();
 
     const activeChecks: string[] = [];
     if (data.checks.grammar) activeChecks.push("gramática");
@@ -112,14 +111,16 @@ Retorne APENAS JSON:
       ? `Original:\n${data.originalText}\n\nTradução:\n${data.text}`
       : `Texto:\n${data.text}`;
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: OPENROUTER_MODEL,
       max_tokens: 3000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userPrompt }],
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
     });
 
-    const rawJson = response.content[0].type === "text" ? response.content[0].text : "{}";
+    const rawJson = response.choices[0]?.message?.content || "{}";
 
     try {
       const parsed = JSON.parse(rawJson);

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
@@ -13,6 +13,7 @@ import {
   Sparkles,
   SlidersHorizontal,
   X,
+  LogIn,
 } from "lucide-react";
 import { setActiveProject } from "@/lib/active-project-store";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
@@ -113,6 +114,28 @@ function ChatPage() {
     setInput("");
     sendMessage(text);
   };
+
+  if (!user) {
+    return (
+      <AppShell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 animate-fade-in">
+          <div className="glass rounded-3xl p-8 card-hover text-center max-w-sm">
+            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Faça login</h2>
+            <p className="text-sm text-muted-foreground mb-6">Entre para começar a traduzir.</p>
+            <Link
+              to="/entrar"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-pink-400 to-purple-400 text-white hover:opacity-90 transition"
+            >
+              <LogIn className="w-4 h-4" /> Entrar
+            </Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>

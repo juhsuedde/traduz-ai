@@ -1,13 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import Anthropic from "@anthropic-ai/sdk";
 import { getCookie } from "@tanstack/react-start/server";
 import { db } from "../db";
 import { chatSessions, messages, domains } from "../db/schema";
 import { eq } from "drizzle-orm";
 import { buildSystemPrompt } from "../prompts";
-import process from "node:process";
 import { lucia } from "../auth/lucia";
+import { getOpenRouterClient, OPENROUTER_MODEL } from "./openrouter";
 
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -107,11 +106,12 @@ export const sendChatMessage = createServerFn({ method: "POST" })
   .inputValidator(ChatInputSchema)
   .handler(async ({ data }) => {
     const user = await getAuthUser();
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const openai = getOpenRouterClient();
 
     const systemPrompt = await buildSystemPrompt(data.domainSlug, data.projectId, data.sessionType);
 
-    const anthropicMessages: Anthropic.MessageParam[] = [
+    const messages = [
+      { role: "system" as const, content: systemPrompt },
       ...data.history.map((m) => ({
         role: m.role as "user" | "assistant",
         content: m.content,
@@ -119,17 +119,18 @@ export const sendChatMessage = createServerFn({ method: "POST" })
       { role: "user" as const, content: data.message },
     ];
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const response = await openai.chat.completions.create({
+      model: OPENROUTER_MODEL,
       max_tokens: 2000,
-      system: systemPrompt,
-      messages: anthropicMessages,
+      messages,
     });
 
-    const assistantMessage = response.content[0].type === "text" ? response.content[0].text : "";
+    const assistantMessage = response.choices[0]?.message?.content || "";
+    const inputTokens = response.usage?.prompt_tokens || 0;
+    const outputTokens = response.usage?.completion_tokens || 0;
 
     return {
       message: assistantMessage,
-      tokensUsed: response.usage.input_tokens + response.usage.output_tokens,
+      tokensUsed: inputTokens + outputTokens,
     };
   });

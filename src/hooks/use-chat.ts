@@ -99,6 +99,19 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
                   return copy;
                 });
               }
+              if (parsed.error) {
+                setMessages((prev) => {
+                  const copy = [...prev];
+                  const last = copy[copy.length - 1];
+                  if (last && last.role === "assistant") {
+                    copy[copy.length - 1] = {
+                      ...last,
+                      content: `Erro: ${parsed.error}`,
+                    };
+                  }
+                  return copy;
+                });
+              }
             } catch {
               // skip malformed JSON chunks
             }

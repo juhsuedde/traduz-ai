@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Clapperboard, BookOpen, Gamepad2, Cog, Scale, ArrowRight, Sparkles } from "lucide-react";
-import { currentUser } from "@/lib/mock-data";
+import { Clapperboard, BookOpen, Gamepad2, Cog, Scale, ArrowRight, Sparkles, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/use-auth";
 
 const domains = [
   {
@@ -63,6 +63,7 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
+  const { user } = useAuth();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -84,16 +85,26 @@ function LandingPage() {
         }}
       />
 
-      {/* Top right user avatar */}
+      {/* Top right user / login */}
       <div className="absolute top-6 right-6 z-20">
-        <div className="glass rounded-full pl-4 pr-2 py-2 flex items-center gap-3">
-          <span className="text-sm font-medium hidden sm:inline">{currentUser.name}</span>
-          <Avatar className="w-9 h-9">
-            <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white text-xs font-semibold">
-              {currentUser.initials}
-            </AvatarFallback>
-          </Avatar>
-        </div>
+        {user ? (
+          <Link to="/inicio" className="glass rounded-full pl-4 pr-2 py-2 flex items-center gap-3 hover:bg-white/60 transition">
+            <span className="text-sm font-medium hidden sm:inline">{user.name || user.email}</span>
+            <Avatar className="w-9 h-9">
+              <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white text-xs font-semibold">
+                {(user.name || user.email).slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
+        ) : (
+          <Link
+            to="/entrar"
+            className="glass rounded-full px-5 py-2.5 flex items-center gap-2 hover:bg-white/60 transition text-sm font-medium"
+          >
+            <LogIn className="w-4 h-4" />
+            Entrar
+          </Link>
+        )}
       </div>
 
       {/* Logo top left */}

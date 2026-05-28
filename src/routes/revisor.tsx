@@ -1,9 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { Sparkles, Upload, FileText, CheckCircle2, Search } from "lucide-react";
+import { Sparkles, Upload, FileText, CheckCircle2, Search, LogIn } from "lucide-react";
 import { useActiveProject } from "@/lib/active-project-store";
+import { useAuth } from "@/hooks/use-auth";
+import { reviewText } from "@/lib/api/reviewer.functions";
 
 export const Route = createFileRoute("/revisor")({
   head: () => ({
@@ -18,31 +21,9 @@ export const Route = createFileRoute("/revisor")({
 type CheckId = "gramatica" | "semantica" | "fluencia" | "projeto" | "guia";
 type Check = { id: CheckId; label: string; available: boolean };
 
-const SAMPLE_ORIGINAL = "Eu não posso acreditar que você realmente fez aquilo.";
-
-type Note = {
-  type: "Gramática" | "Semântica" | "Fluência" | "Projeto" | "Guia";
-  problem: string;
-  suggestion: string;
-};
-
-const MOCK_NOTES: Note[] = [
-  {
-    type: "Fluência",
-    problem: "Omitir 'Eu' soa mais natural",
-    suggestion:
-      "Em legendas e textos informais, o sujeito explícito ('Eu') pode ser omitido para soar mais próximo da fala oral.",
-  },
-  {
-    type: "Semântica",
-    problem: "'aquilo' → 'isso'",
-    suggestion:
-      "'Isso' é mais adequado para ações imediatas e contextualmente próximas. 'Aquilo' indica distância, o que não é o caso aqui.",
-  },
-];
-
 function RevisorPage() {
-  const [text, setText] = useState(SAMPLE_ORIGINAL);
+  const { user } = useAuth();
+  const [text, setText] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [checks, setChecks] = useState<Record<CheckId, boolean>>({
     gramatica: true,
@@ -55,7 +36,45 @@ function RevisorPage() {
   const hasProject = !!activeProject;
   const [styleGuideName, setStyleGuideName] = useState<string | null>(null);
   const hasStyleGuide = !!styleGuideName;
-  const [status, setStatus] = useState<"idle" | "analyzing" | "done">("idle");
+
+  if (!user) {
+    return (
+      <AppShell>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 animate-fade-in">
+          <div className="glass rounded-3xl p-8 card-hover text-center max-w-sm">
+            <div className="w-14 h-14 rounded-3xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center mx-auto mb-4">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">Faça login</h2>
+            <p className="text-sm text-muted-foreground mb-6">Entre para usar o revisor.</p>
+            <Link
+              to="/entrar"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-pink-400 to-purple-400 text-white hover:opacity-90 transition"
+            >
+              <LogIn className="w-4 h-4" /> Entrar
+            </Link>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  const reviewMutation = useMutation({
+    mutationFn: () =>
+      reviewText({
+        data: {
+          text,
+          projectId: activeProject?.id,
+          checks: {
+            grammar: checks.gramatica,
+            semantics: checks.semantica,
+            fluency: checks.fluencia,
+            projectAdherence: checks.projeto,
+            styleGuide: checks.guia,
+          },
+        },
+      }),
+  });
 
   const availableChecks: Check[] = [
     { id: "gramatica", label: "Gramática", available: true },
@@ -74,9 +93,8 @@ function RevisorPage() {
   };
 
   const analyze = () => {
-    if (!text.trim()) return;
-    setStatus("analyzing");
-    window.setTimeout(() => setStatus("done"), 2000);
+    if (!text.trim() && !fileName) return;
+    reviewMutation.mutate();
   };
 
   return (
@@ -92,7 +110,7 @@ function RevisorPage() {
           value={text}
           onChange={(e) => {
             setText(e.target.value);
-            if (status === "done") setStatus("idle");
+            reviewMutation.reset();
           }}
           rows={6}
           placeholder="Cole aqui o texto que você quer revisar..."
@@ -150,10 +168,10 @@ function RevisorPage() {
       <div className="flex justify-end mb-6">
         <button
           onClick={analyze}
-          disabled={status === "analyzing" || !text.trim()}
+          disabled={reviewMutation.isPending || (!text.trim() && !fileName)}
           className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-400 to-purple-400 text-white text-sm font-medium hover:opacity-90 shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {status === "analyzing" ? (
+          {reviewMutation.isPending ? (
             <>
               <DotsPulse /> Analisando…
             </>
@@ -166,7 +184,7 @@ function RevisorPage() {
       </div>
 
       {/* Analyzing state */}
-      {status === "analyzing" && (
+      {reviewMutation.isPending && (
         <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-4 animate-fade-in relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-pulse" />
           <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-pink-300 to-purple-300 flex items-center justify-center shadow-sm">
@@ -181,8 +199,17 @@ function RevisorPage() {
         </section>
       )}
 
+      {/* Error */}
+      {reviewMutation.isError && !reviewMutation.isPending && (
+        <section className="glass rounded-3xl p-5 animate-fade-in">
+          <div className="text-sm text-red-500 bg-red-50 rounded-2xl px-4 py-3 border border-red-100">
+            {(reviewMutation.error as Error).message}
+          </div>
+        </section>
+      )}
+
       {/* Results */}
-      {status === "done" && (
+      {reviewMutation.isSuccess && !reviewMutation.isPending && (
         <div className="flex flex-col gap-5 animate-fade-in">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <article className="glass rounded-3xl p-5">
@@ -190,9 +217,8 @@ function RevisorPage() {
                 <FileText className="w-4 h-4 text-muted-foreground" />
                 <h3 className="font-semibold text-sm">Texto Original</h3>
               </div>
-              <p className="text-sm leading-relaxed bg-white/60 rounded-2xl p-4">
-                <Mark color="red">Eu não posso</Mark> acreditar que você realmente fez{" "}
-                <Mark color="red">aquilo</Mark>.
+              <p className="text-sm leading-relaxed bg-white/60 rounded-2xl p-4 whitespace-pre-wrap">
+                {reviewMutation.data.originalText}
               </p>
             </article>
 
@@ -201,9 +227,8 @@ function RevisorPage() {
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <h3 className="font-semibold text-sm">Texto Corrigido</h3>
               </div>
-              <p className="text-sm leading-relaxed bg-white/60 rounded-2xl p-4">
-                <Mark color="green">Não posso</Mark> acreditar que você realmente fez{" "}
-                <Mark color="green">isso</Mark>.
+              <p className="text-sm leading-relaxed bg-white/60 rounded-2xl p-4 whitespace-pre-wrap">
+                {reviewMutation.data.correctedText}
               </p>
             </article>
           </div>
@@ -212,20 +237,26 @@ function RevisorPage() {
             <div className="px-1 mb-3">
               <h3 className="font-semibold tracking-tight">Observações</h3>
               <p className="text-xs text-muted-foreground">
-                {MOCK_NOTES.length} sugestões para deixar seu texto mais natural.
+                {reviewMutation.data.notes.length} sugestões para melhorar seu texto.
               </p>
             </div>
             <div className="flex flex-col gap-3">
-              {MOCK_NOTES.map((n, i) => (
-                <NoteCard key={i} note={n} />
-              ))}
+              {reviewMutation.data.notes.length === 0 ? (
+                <div className="text-sm text-muted-foreground bg-white/60 rounded-2xl p-4">
+                  Nenhuma observação — texto está ok!
+                </div>
+              ) : (
+                reviewMutation.data.notes.map((n: { type: string; original_fragment: string; corrected_fragment: string; explanation: string }, i: number) => (
+                  <NoteCard key={i} note={n} />
+                ))
+              )}
             </div>
           </section>
         </div>
       )}
 
       {/* Idle empty hint */}
-      {status === "idle" && (
+      {!reviewMutation.isPending && !reviewMutation.isSuccess && !reviewMutation.isError && (
         <section className="glass rounded-3xl p-10 flex flex-col items-center justify-center gap-3 text-center">
           <div className="w-12 h-12 rounded-2xl bg-white/60 flex items-center justify-center">
             <Search className="w-5 h-5 text-muted-foreground" />
@@ -257,8 +288,8 @@ function Mark({ color, children }: { color: "red" | "green"; children: React.Rea
   return <span className={`rounded px-1 ${cls}`}>{children}</span>;
 }
 
-function NoteCard({ note }: { note: Note }) {
-  const badge: Record<Note["type"], string> = {
+function NoteCard({ note }: { note: { type: string; original_fragment: string; corrected_fragment: string; explanation: string } }) {
+  const badge: Record<string, string> = {
     Gramática: "from-amber-100 to-pink-200 text-amber-900",
     Semântica: "from-sky-200 to-teal-200 text-teal-900",
     Fluência: "from-pink-200 to-purple-200 text-purple-900",
@@ -269,13 +300,17 @@ function NoteCard({ note }: { note: Note }) {
     <article className="glass rounded-3xl p-5">
       <div className="flex items-center gap-2 mb-2">
         <span
-          className={`text-xs px-2.5 py-0.5 rounded-full font-medium bg-gradient-to-r ${badge[note.type]}`}
+          className={`text-xs px-2.5 py-0.5 rounded-full font-medium bg-gradient-to-r ${badge[note.type] || "from-gray-200 to-gray-300 text-gray-800"}`}
         >
           {note.type}
         </span>
-        <span className="text-sm font-medium">{note.problem}</span>
       </div>
-      <p className="text-sm text-muted-foreground leading-relaxed">{note.suggestion}</p>
+      <p className="text-sm leading-relaxed mb-2">
+        <Mark color="red">{note.original_fragment}</Mark>
+        {" → "}
+        <Mark color="green">{note.corrected_fragment}</Mark>
+      </p>
+      <p className="text-sm text-muted-foreground leading-relaxed">{note.explanation}</p>
     </article>
   );
 }

@@ -15,11 +15,16 @@ import {
   ArrowRight,
   Shuffle,
   SlidersHorizontal,
+  LogOut,
+  LogIn,
 } from "lucide-react";
-import { currentUser } from "@/lib/mock-data";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useActiveProject, setActiveProject } from "@/lib/active-project-store";
 import { shortLabel, useQuickSettings } from "@/lib/quick-settings";
+import { useAuth } from "@/hooks/use-auth";
+import { signOut } from "@/lib/api/auth.functions";
+import { useRouter } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const items = [
   { title: "Início", url: "/inicio", icon: MessageCircle, accent: "from-pink-300 to-purple-300" },
@@ -47,10 +52,21 @@ function SidebarContent({
   collapsed: boolean;
   onNavigate?: () => void;
 }) {
+  const { user } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const activeProject = useActiveProject();
   const activeSettings = useQuickSettings(activeProject?.id ?? null);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const logoutMutation = useMutation({
+    mutationFn: () => signOut({}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+      router.invalidate();
+    },
+  });
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -194,56 +210,97 @@ function SidebarContent({
 
       {/* Perfil */}
       <div className="relative" ref={profileRef}>
-        {profileOpen && (
-          <div
-            className={`absolute bottom-full mb-2 glass rounded-2xl p-2 flex flex-col gap-1 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200 ${
-              collapsed ? "left-0 w-44" : "left-0 right-0"
+        {user ? (
+          <>
+            {profileOpen && (
+              <div
+                className={`absolute bottom-full mb-2 glass rounded-2xl p-2 flex flex-col gap-1 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                  collapsed ? "left-0 w-44" : "left-0 right-0"
+                }`}
+              >
+                <Link
+                  to="/configuracoes"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    onNavigate?.();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
+                >
+                  <Settings className="w-4 h-4 text-muted-foreground" />
+                  Configurações
+                </Link>
+                <Link
+                  to="/sugestoes"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    onNavigate?.();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
+                >
+                  <Lightbulb className="w-4 h-4 text-muted-foreground" />
+                  Sugestões
+                </Link>
+                <div className="border-t border-white/60 my-1" />
+                <button
+                  onClick={() => {
+                    setProfileOpen(false);
+                    logoutMutation.mutate();
+                  }}
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-red-500 hover:bg-red-50 transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  {logoutMutation.isPending ? "Saindo..." : "Sair"}
+                </button>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setProfileOpen((o) => !o)}
+              className={`glass rounded-3xl flex items-center gap-3 w-full text-left transition hover:bg-white/60 ${
+                collapsed ? "p-2 justify-center" : "p-4"
+              } ${profileOpen ? "ring-2 ring-purple-200" : ""}`}
+              aria-label="Abrir menu do perfil"
+            >
+              <Avatar className="w-10 h-10 shrink-0">
+                <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white font-semibold">
+                  {user.name
+                    ? user.name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2)
+                    : user.email.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {!collapsed && (
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold truncate">
+                    {user.name || user.email.split("@")[0]}
+                  </div>
+                  <div className="text-xs text-muted-foreground truncate">Tradutora</div>
+                </div>
+              )}
+            </button>
+          </>
+        ) : (
+          <Link
+            to="/entrar"
+            className={`glass rounded-3xl flex items-center gap-3 w-full text-left transition hover:bg-white/60 ${
+              collapsed ? "p-2 justify-center" : "p-4"
             }`}
           >
-            <Link
-              to="/configuracoes"
-              onClick={() => {
-                setProfileOpen(false);
-                onNavigate?.();
-              }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
-            >
-              <Settings className="w-4 h-4 text-muted-foreground" />
-              Configurações
-            </Link>
-            <Link
-              to="/sugestoes"
-              onClick={() => {
-                setProfileOpen(false);
-                onNavigate?.();
-              }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-foreground hover:bg-white/60 transition"
-            >
-              <Lightbulb className="w-4 h-4 text-muted-foreground" />
-              Sugestões
-            </Link>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={() => setProfileOpen((o) => !o)}
-          className={`glass rounded-3xl flex items-center gap-3 w-full text-left transition hover:bg-white/60 ${
-            collapsed ? "p-2 justify-center" : "p-4"
-          } ${profileOpen ? "ring-2 ring-purple-200" : ""}`}
-          aria-label="Abrir menu do perfil"
-        >
-          <Avatar className="w-10 h-10 shrink-0">
-            <AvatarFallback className="bg-gradient-to-br from-purple-300 to-pink-300 text-white font-semibold">
-              {currentUser.initials}
-            </AvatarFallback>
-          </Avatar>
-          {!collapsed && (
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold truncate">{currentUser.name}</div>
-              <div className="text-xs text-muted-foreground truncate">Tradutora</div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-300 to-pink-300 flex items-center justify-center shrink-0">
+              <LogIn className="w-5 h-5 text-white" />
             </div>
-          )}
-        </button>
+            {!collapsed && (
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold truncate">Entrar</div>
+                <div className="text-xs text-muted-foreground truncate">Faça login</div>
+              </div>
+            )}
+          </Link>
+        )}
       </div>
     </div>
   );

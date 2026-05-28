@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import Anthropic from "@anthropic-ai/sdk";
 import { getCookie } from "@tanstack/react-start/server";
 import { buildSystemPrompt } from "../prompts";
 import {
@@ -14,8 +13,8 @@ import {
 import { writeFile, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
-import process from "node:process";
 import { lucia } from "../auth/lucia";
+import { getOpenRouterClient, OPENROUTER_MODEL } from "./openrouter";
 
 const UPLOAD_DIR = "./uploads/translations";
 const BATCH_SIZE = 10;
@@ -32,16 +31,21 @@ async function getAuthUser() {
 async function translateBatch(
   segments: Array<{ id: string; original: string }>,
   systemPrompt: string,
-  anthropic: Anthropic,
+  openai: ReturnType<typeof getOpenRouterClient>,
 ) {
   const input = JSON.stringify(segments.map((s) => ({ id: s.id, text: s.original })));
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-20250514",
+  const response = await openai.chat.completions.create({
+    model: OPENROUTER_MODEL,
     max_tokens: 4000,
-    system: systemPrompt + '\n\nRetorne APENAS JSON: [{"id": "1", "translated": "texto"}, ...]',
-    messages: [{ role: "user", content: `Traduza:\n${input}` }],
+    messages: [
+      {
+        role: "system",
+        content: systemPrompt + '\n\nRetorne APENAS JSON: [{"id": "1", "translated": "texto"}, ...]',
+      },
+      { role: "user", content: `Traduza:\n${input}` },
+    ],
   });
-  const raw = response.content[0].type === "text" ? response.content[0].text : "[]";
+  const raw = response.choices[0]?.message?.content || "[]";
   try {
     return JSON.parse(raw);
   } catch {
@@ -61,9 +65,7 @@ export const translateFile = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const user = await getAuthUser();
-    const anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+    const openai = getOpenRouterClient();
 
     const systemPrompt = await buildSystemPrompt(data.domainSlug, data.projectId, "translation");
 
@@ -83,7 +85,7 @@ export const translateFile = createServerFn({ method: "POST" })
     const translations: Array<{ id: string; translated: string }> = [];
     for (let i = 0; i < parsed.segments.length; i += BATCH_SIZE) {
       const batch = parsed.segments.slice(i, i + BATCH_SIZE);
-      const result = await translateBatch(batch, systemPrompt, anthropic);
+      const result = await translateBatch(batch, systemPrompt, openai);
       translations.push(...result);
     }
 

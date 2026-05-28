@@ -1,10 +1,3 @@
-export const currentUser = {
-  name: "Ana",
-  email: "ana@traduz.ai",
-  initials: "AN",
-  role: "Tradutora EN → PT",
-};
-
 export type Project = {
   id: string;
   name: string;
