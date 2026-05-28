@@ -11,13 +11,14 @@ async function init() {
   if (db) return;
 
   if (typeof Bun !== "undefined") {
-    const { Database } = await import("bun:sqlite");
-    const { drizzle } = await import("drizzle-orm/bun-sqlite");
+    const _import = new Function("m", "return import(m)");
+    const { Database } = (await _import("bun:sqlite")) as typeof import("bun:sqlite");
+    const { drizzle } = (await _import("drizzle-orm/bun-sqlite")) as typeof import("drizzle-orm/bun-sqlite");
     sqlite = new Database("traduzai.db");
     sqlite.run("PRAGMA journal_mode = WAL");
     db = drizzle(sqlite) as unknown as DBInstance;
   } else {
-    const Database = (await import("better-sqlite3")).default;
+    const { default: Database } = (await import("better-sqlite3")) as typeof import("better-sqlite3");
     const { drizzle } = await import("drizzle-orm/better-sqlite3");
     sqlite = new Database("traduzai.db");
     sqlite.pragma("journal_mode = WAL");
