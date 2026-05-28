@@ -14,6 +14,7 @@ import {
   SlidersHorizontal,
   X,
   LogIn,
+  Copy,
 } from "lucide-react";
 import { setActiveProject } from "@/lib/active-project-store";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
@@ -334,12 +335,21 @@ function Bubble({ message }: { message: ChatMessage }) {
   return (
     <div className={`flex animate-fade-in ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-[80%] px-5 py-3 rounded-3xl text-sm leading-relaxed whitespace-pre-wrap ${
+        className={`group max-w-[80%] px-5 py-3 rounded-3xl text-sm leading-relaxed whitespace-pre-wrap ${
           isUser
             ? "bg-gradient-to-br from-pink-200 to-purple-200 text-purple-950 rounded-br-md"
             : "bg-white/80 text-foreground rounded-bl-md"
         }`}
       >
+        {!isUser && (
+          <button
+            onClick={() => navigator.clipboard.writeText(message.content)}
+            className="float-right ml-2 w-6 h-6 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-black/5 text-muted-foreground flex items-center justify-center transition cursor-pointer"
+            aria-label="Copiar"
+          >
+            <Copy className="w-3 h-3" />
+          </button>
+        )}
         {message.content}
       </div>
     </div>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
-import { Sparkles, Upload, FileText, CheckCircle2, Search, LogIn } from "lucide-react";
+import { Sparkles, Upload, FileText, CheckCircle2, Search, LogIn, Copy } from "lucide-react";
 import { useActiveProject } from "@/lib/active-project-store";
 import { useAuth } from "@/hooks/use-auth";
 import { reviewText } from "@/lib/api/reviewer.functions";
@@ -226,6 +226,13 @@ function RevisorPage() {
               <div className="flex items-center gap-2 mb-3">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <h3 className="font-semibold text-sm">Texto Corrigido</h3>
+                <button
+                  onClick={() => navigator.clipboard.writeText(reviewMutation.data.correctedText)}
+                  className="ml-auto w-6 h-6 rounded-lg hover:bg-white/70 text-muted-foreground flex items-center justify-center transition cursor-pointer"
+                  aria-label="Copiar texto corrigido"
+                >
+                  <Copy className="w-3 h-3" />
+                </button>
               </div>
               <p className="text-sm leading-relaxed bg-white/60 rounded-2xl p-4 whitespace-pre-wrap">
                 {reviewMutation.data.correctedText}
