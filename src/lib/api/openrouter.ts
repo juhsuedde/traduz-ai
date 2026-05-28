@@ -1,9 +1,11 @@
 import OpenAI from "openai";
 import process from "node:process";
 
-const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
+const OPENROUTER_BASE =
+  process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
 
-export const OPENROUTER_MODEL = "anthropic/claude-sonnet-4";
+export const OPENROUTER_MODEL =
+  process.env.OPENROUTER_MODEL ?? "openai/gpt-4o-mini";
 
 let _client: OpenAI | null = null;
 

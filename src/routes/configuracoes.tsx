@@ -33,6 +33,7 @@ import {
   type QuickSettings,
   DEFAULT_SETTINGS,
 } from "@/lib/quick-settings";
+import { getSavedDomain, saveDomain } from "@/lib/domain-store";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
@@ -44,7 +45,23 @@ export const Route = createFileRoute("/configuracoes")({
   component: ConfiguracoesPage,
 });
 
-const DOMAIN_OPTIONS = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica", "Último usado"];
+const DOMAIN_OPTIONS = ["Audiovisual", "Literária", "Games", "Técnica", "Jurídica"];
+
+const SLUG_TO_NAME: Record<string, string> = {
+  audiovisual: "Audiovisual",
+  literary: "Literária",
+  games: "Games",
+  technical: "Técnica",
+  legal: "Jurídica",
+};
+
+const NAME_TO_SLUG: Record<string, string> = {
+  Audiovisual: "audiovisual",
+  Literária: "literary",
+  Games: "games",
+  Técnica: "technical",
+  Jurídica: "legal",
+};
 
 type Density = "compacto" | "confortavel" | "espacoso";
 
@@ -54,7 +71,10 @@ function ConfiguracoesPage() {
   const [profileName, setProfileName] = useState(user?.name || "");
   const [profileRole, setProfileRole] = useState("Tradutora EN → PT");
 
-  const [defaultDomain, setDefaultDomain] = useState("Último usado");
+  const [defaultDomain, setDefaultDomain] = useState(() => {
+    const saved = getSavedDomain();
+    return saved ? (SLUG_TO_NAME[saved] ?? "Audiovisual") : "Audiovisual";
+  });
   const [globalSettings, setGlobalSettings] = useState<QuickSettings>(() => getGlobalDefaults());
 
   const [darkMode, setDarkMode] = useState(false);
@@ -144,7 +164,12 @@ function ConfiguracoesPage() {
         <div className="relative max-w-xs">
           <select
             value={defaultDomain}
-            onChange={(e) => setDefaultDomain(e.target.value)}
+            onChange={(e) => {
+              const name = e.target.value;
+              setDefaultDomain(name);
+              const slug = NAME_TO_SLUG[name];
+              if (slug) saveDomain(slug);
+            }}
             className="w-full appearance-none bg-white/70 rounded-2xl px-4 py-2.5 text-sm border border-white/60 focus:outline-none focus:ring-2 focus:ring-purple-200"
           >
             {DOMAIN_OPTIONS.map((d) => (

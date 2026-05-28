@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { setActiveProject } from "@/lib/active-project-store";
 import { QuickSettingsPanel } from "@/components/quick-settings-panel";
+import { getSavedDomain, saveDomain } from "@/lib/domain-store";
 import {
   setProjectSettings,
   setSessionSettings,
@@ -56,7 +57,10 @@ function ChatPage() {
   const { user } = useAuth();
   const [input, setInput] = useState("");
   const [mode, setMode] = useState<"traducao" | "revisao">("traducao");
-  const [domain, setDomain] = useState<string>("Audiovisual");
+  const [domain, setDomain] = useState<string>(() => {
+    const saved = getSavedDomain();
+    return saved ? (SLUG_MAP[saved] ?? "Audiovisual") : "Audiovisual";
+  });
   const [projectId, setProjectId] = useState<string>("none");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -102,6 +106,11 @@ function ChatPage() {
         : null,
     );
   }, [activeProject, effectiveDomain]);
+
+  useEffect(() => {
+    const slug = DOMAIN_TO_SLUG[domain];
+    if (slug) saveDomain(slug);
+  }, [domain]);
 
   const updateSettings = (s: typeof settings) => {
     if (activeProject) setProjectSettings(activeProject.id, s);

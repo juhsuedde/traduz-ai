@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clapperboard, BookOpen, Gamepad2, Cog, Scale, ArrowRight, Sparkles, LogIn } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/use-auth";
+import { getSavedDomain, saveDomain } from "@/lib/domain-store";
 
 const domains = [
   {
@@ -65,14 +66,27 @@ export const Route = createFileRoute("/")({
 function LandingPage() {
   const { user } = useAuth();
   const [selectedDomain, setSelectedDomain] = useState<string | null>(null);
+  const [checking, setChecking] = useState(true);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const saved = getSavedDomain();
+    if (saved) {
+      navigate({ to: "/inicio" });
+    } else {
+      setChecking(false);
+    }
+  }, [navigate]);
 
   const handleSelect = (id: string) => {
     setSelectedDomain(id);
+    saveDomain(id);
     setTimeout(() => {
       navigate({ to: "/inicio" });
     }, 250);
   };
+
+  if (checking) return null;
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
